@@ -118,7 +118,10 @@ recipes = [
   }
 ]
 
-# Create recipes in the database
+categories = ["Breakfast", "Main Course", "Dessert"].map do |name|
+  Category.create!(name: name)
+end
+
 recipes.each do |recipe_data|
   Recipe.create!(
     title: recipe_data[:title],
@@ -127,8 +130,9 @@ recipes.each do |recipe_data|
     instructions: recipe_data[:instructions],
     prep_time: recipe_data[:prep_time],
     ingredients: recipe_data[:ingredients],
-    nutrition: recipe_data[:nutrition]
+    nutrition: recipe_data[:nutrition],
+    category: categories.sample
   )
 end
 
-puts "Seeded #{Recipe.count} recipes!"
+puts "Seeded #{Category.count} categories and #{Recipe.count} recipes!"
