@@ -65,6 +65,26 @@ class RecipesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def recipe_params
-      params.expect(recipe: [ :title, :description, :serves, :instructions, :prep_time, :ingredients, :nutrition ])
-    end
+  permitted_params = params.require(:recipe).permit(
+    :title,
+    :description,
+    :serves,
+    :instructions,
+    :prep_time,
+    ingredients: [:name, :quantity, :unit] # Nested attribute for ingredients
+  )
+
+  # Manually handle nutrition fields
+  permitted_params[:nutrition] = {
+    calories: params[:recipe][:nutrition_calories],
+    protein: params[:recipe][:nutrition_protein],
+    fat: params[:recipe][:nutrition_fat],
+    carbs: params[:recipe][:nutrition_carbs],
+    fibre: params[:recipe][:nutrition_fibre],
+    sugar: params[:recipe][:nutrition_sugar],
+    sodium: params[:recipe][:nutrition_sodium]
+  }
+
+  permitted_params
+end
 end

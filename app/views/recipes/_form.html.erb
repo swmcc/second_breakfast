@@ -11,42 +11,110 @@
     </div>
   <% end %>
 
+  <!-- Title Field -->
   <div class="my-5">
     <%= form.label :title %>
-    <%= form.text_field :title, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:title].none?, "border-red-400 focus:outline-red-600": recipe.errors[:title].any?}] %>
+    <%= form.text_field :title, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
   </div>
 
+  <!-- Description Field -->
   <div class="my-5">
     <%= form.label :description %>
-    <%= form.textarea :description, rows: 4, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:description].none?, "border-red-400 focus:outline-red-600": recipe.errors[:description].any?}] %>
+    <%= form.text_area :description, rows: 4, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
   </div>
-
   <div class="my-5">
-    <%= form.label :serves %>
-    <%= form.number_field :serves, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:serves].none?, "border-red-400 focus:outline-red-600": recipe.errors[:serves].any?}] %>
-  </div>
+  <%= form.label :serves %>
+  <%= form.number_field :serves, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
+</div>
 
-  <div class="my-5">
-    <%= form.label :instructions %>
-    <%= form.textarea :instructions, rows: 4, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:instructions].none?, "border-red-400 focus:outline-red-600": recipe.errors[:instructions].any?}] %>
-  </div>
+<div class="my-5">
+  <%= form.label :instructions %>
+  <%= form.text_area :instructions, rows: 4, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
+</div>
 
-  <div class="my-5">
-    <%= form.label :prep_time %>
-    <%= form.text_field :prep_time, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:prep_time].none?, "border-red-400 focus:outline-red-600": recipe.errors[:prep_time].any?}] %>
-  </div>
-
+  <!-- Ingredients Section -->
   <div class="my-5">
     <%= form.label :ingredients %>
-    <%= form.text_field :ingredients, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:ingredients].none?, "border-red-400 focus:outline-red-600": recipe.errors[:ingredients].any?}] %>
+    <div id="ingredients" class="mt-2">
+      <!-- Template for new ingredients -->
+      <template id="ingredient-template">
+        <div class="flex gap-2 mb-2">
+          <input type="text" name="recipe[ingredients][][name]" placeholder="Name" class="shadow rounded-md border px-3 py-2 flex-grow">
+          <input type="number" name="recipe[ingredients][][quantity]" placeholder="Quantity" class="shadow rounded-md border px-3 py-2 w-24">
+          <input type="text" name="recipe[ingredients][][unit]" placeholder="Unit" class="shadow rounded-md border px-3 py-2 w-24">
+          <button type="button" onclick="this.parentElement.remove()" class="px-3 py-2 bg-red-600 text-white rounded-md">Remove</button>
+        </div>
+      </template>
+
+      <!-- Existing ingredients displayed on edit -->
+      <% if recipe.ingredients.present? && recipe.ingredients.any? %>
+        <% recipe.ingredients.each do |ingredient| %>
+          <div class="flex gap-2 mb-2">
+            <input type="text" name="recipe[ingredients][][name]" value="<%= ingredient['name'] %>" placeholder="Name" class="shadow rounded-md border px-3 py-2 flex-grow">
+            <input type="number" name="recipe[ingredients][][quantity]" value="<%= ingredient['quantity'] %>" placeholder="Quantity" class="shadow rounded-md border px-3 py-2 w-24">
+            <input type="text" name="recipe[ingredients][][unit]" value="<%= ingredient['unit'] %>" placeholder="Unit" class="shadow rounded-md border px-3 py-2 w-24">
+            <button type="button" onclick="this.parentElement.remove()" class="px-3 py-2 bg-red-600 text-white rounded-md">Remove</button>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- Add Ingredient Button -->
+    <button type="button" onclick="addIngredient()" class="mt-2 px-3 py-2 bg-green-600 text-white rounded-md">Add Ingredient</button>
+
+    <!-- Script for adding ingredients dynamically -->
+    <script>
+      function addIngredient() {
+        const template = document.getElementById('ingredient-template');
+        const ingredientsDiv = document.getElementById('ingredients');
+        const clone = template.content.cloneNode(true);
+        ingredientsDiv.appendChild(clone);
+      }
+    </script>
+  </div>
+
+  <!-- Other Fields (Prep Time, Nutrition, etc.) -->
+  <div class="my-5">
+    <%= form.label :prep_time %>
+    <%= form.text_field :prep_time, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
   </div>
 
   <div class="my-5">
-    <%= form.label :nutrition %>
-    <%= form.text_field :nutrition, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:nutrition].none?, "border-red-400 focus:outline-red-600": recipe.errors[:nutrition].any?}] %>
+  <%= form.label :nutrition, "Nutrition Details" %>
+  <div id="nutrition-fields" class="mt-2 grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+    <div>
+      <%= form.label :nutrition_calories, "Calories (kcal)" %>
+      <%= form.number_field :nutrition_calories, step: 1, value: recipe.nutrition&.dig("calories"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+    </div>
+    <div>
+      <%= form.label :nutrition_protein, "Protein (g)" %>
+      <%= form.number_field :nutrition_protein, step: 0.1, value: recipe.nutrition&.dig("protein"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+    </div>
+    <div>
+      <%= form.label :nutrition_fat, "Fat (g)" %>
+      <%= form.number_field :nutrition_fat, step: 0.1, value: recipe.nutrition&.dig("fat"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+    </div>
+    <div>
+      <%= form.label :nutrition_carbs, "Carbohydrates (g)" %>
+      <%= form.number_field :nutrition_carbs, step: 0.1, value: recipe.nutrition&.dig("carbs"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+    </div>
+    <div>
+      <%= form.label :nutrition_fibre, "Fibre (g)" %>
+      <%= form.number_field :nutrition_fibre, step: 0.1, value: recipe.nutrition&.dig("fibre"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+    </div>
+    <div>
+      <%= form.label :nutrition_sugar, "Sugar (g)" %>
+      <%= form.number_field :nutrition_sugar, step: 0.1, value: recipe.nutrition&.dig("sugar"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+    </div>
+    <div>
+      <%= form.label :nutrition_sodium, "Sodium (mg)" %>
+      <%= form.number_field :nutrition_sodium, step: 1, value: recipe.nutrition&.dig("sodium"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+    </div>
   </div>
+</div>
 
+  <!-- Submit Button -->
   <div class="inline">
-    <%= form.submit class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+    <%= form.submit class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium cursor-pointer mt-6" %>
   </div>
 <% end %>
