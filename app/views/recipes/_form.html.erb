@@ -17,6 +17,11 @@
     <%= form.text_field :title, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
   </div>
 
+  <div class="my-5">
+  <%= form.label :category_id, "Category" %>
+  <%= form.collection_select :category_id, Category.all, :id, :name, prompt: "Select a category", class: "block shadow rounded-md border px-3 py-2 mt-2 w-full" %>
+  </div>
+
   <!-- Description Field -->
   <div class="my-5">
     <%= form.label :description %>

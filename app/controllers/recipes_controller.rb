@@ -71,6 +71,7 @@ class RecipesController < ApplicationController
     :serves,
     :instructions,
     :prep_time,
+    :category_id,
     ingredients: [:name, :quantity, :unit] # Nested attribute for ingredients
   )
 
