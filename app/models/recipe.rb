@@ -1,4 +1,5 @@
 class Recipe < ApplicationRecord
+  has_rich_text :instructions
   validates :title, :description, :serves, :instructions, :prep_time, :ingredients, :nutrition, presence: true
 
   validate :validate_nutrition_format
