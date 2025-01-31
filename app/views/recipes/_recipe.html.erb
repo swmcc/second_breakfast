@@ -20,11 +20,24 @@
     <%= recipe.prep_time %>
   </p>
   <p class="my-5">
-    <strong class="block font-medium mb-1">Ingredients:</strong>
-    <%= recipe.ingredients %>
-  </p>
+  <p><strong>Ingredients:</strong></p>
+<ul class="list-disc ml-6">
+  <% recipe.ingredients.each do |ingredient| %>
+    <li>
+      <%= ingredient["quantity"] %> <%= ingredient["unit"] %> <%= ingredient["name"] %>
+    </li>
+  <% end %>
+</ul>
   <p class="my-5">
     <strong class="block font-medium mb-1">Nutrition:</strong>
-    <%= recipe.nutrition %>
-  </p>
+<ul class="list-disc ml-6">
+  <li>Calories: <%= recipe.nutrition["calories"] %> kcal</li>
+  <li>Protein: <%= recipe.nutrition["protein"] %> g</li>
+  <li>Fat: <%= recipe.nutrition["fat"] %> g</li>
+  <li>Carbohydrates: <%= recipe.nutrition["carbs"] %> g</li>
+  <li>Fibre: <%= recipe.nutrition["fibre"] %> g</li>
+  <li>Sugar: <%= recipe.nutrition["sugar"] %> g</li>
+  <li>Sodium: <%= recipe.nutrition["sodium"] %> mg</li>
+</ul>
+</p>
 </div>
