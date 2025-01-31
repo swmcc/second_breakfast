@@ -1,0 +1,52 @@
+<%= form_with(model: recipe, class: "contents") do |form| %>
+  <% if recipe.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
+      <h2><%= pluralize(recipe.errors.count, "error") %> prohibited this recipe from being saved:</h2>
+
+      <ul class="list-disc ml-6">
+        <% recipe.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="my-5">
+    <%= form.label :title %>
+    <%= form.text_field :title, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:title].none?, "border-red-400 focus:outline-red-600": recipe.errors[:title].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :description %>
+    <%= form.textarea :description, rows: 4, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:description].none?, "border-red-400 focus:outline-red-600": recipe.errors[:description].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :serves %>
+    <%= form.number_field :serves, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:serves].none?, "border-red-400 focus:outline-red-600": recipe.errors[:serves].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :instructions %>
+    <%= form.textarea :instructions, rows: 4, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:instructions].none?, "border-red-400 focus:outline-red-600": recipe.errors[:instructions].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :prep_time %>
+    <%= form.text_field :prep_time, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:prep_time].none?, "border-red-400 focus:outline-red-600": recipe.errors[:prep_time].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :ingredients %>
+    <%= form.text_field :ingredients, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:ingredients].none?, "border-red-400 focus:outline-red-600": recipe.errors[:ingredients].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :nutrition %>
+    <%= form.text_field :nutrition, class: ["block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": recipe.errors[:nutrition].none?, "border-red-400 focus:outline-red-600": recipe.errors[:nutrition].any?}] %>
+  </div>
+
+  <div class="inline">
+    <%= form.submit class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+  </div>
+<% end %>
