@@ -28,6 +28,8 @@
   <nav class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
     <div class="flex flex-1">
       <div class="hidden lg:flex lg:gap-x-12">
+        <%= link_to "Recipes", recipes_path, class: "text-sm/6 font-semibold text-gray-900" %>
+        <%= link_to "Categories", categories_path, class: "text-sm/6 font-semibold text-gray-900" %>
       </div>
       <div class="flex lg:hidden">
         <button type="button" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700">
@@ -40,7 +42,15 @@
     </div>
     <%= link_to root_path, class: "-m-1.5 p-1.5" do %>
       <span class="sr-only">Second Breakfast</span>
-      <img class="h-8 w-auto" src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600" alt="">
+<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-auto text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- Outer Circle (Plate) -->
+  <circle cx="12" cy="12" r="9" stroke="currentColor" fill="none" />
+
+  <!-- Inner Circle (Design detail) -->
+  <circle cx="12" cy="12" r="5" stroke="currentColor" fill="none" />
+</svg>
+
+
     <% end %>
     <div class="flex flex-1 justify-end">
     </div>
@@ -67,6 +77,8 @@
         </div>
       </div>
       <div class="mt-6 space-y-2">
+        <%= link_to "Recipes", recipes_path, class: "-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50" %>
+        <%= link_to "Categories", categories_path, class: "-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50" %>
       </div>
     </div>
   </div>
@@ -75,5 +87,15 @@
     <main class="container mx-auto mt-28 px-5 flex">
       <%= yield %>
     </main>
+
+<footer class="bg-white">
+    <div class="mt-8 border-t border-gray-900/10 pt-8 md:flex md:items-center md:justify-between">
+      <div class="flex gap-x-6 md:order-2">
+      </div>
+      <p class="mt-8 text-sm/6 text-gray-600 md:order-1 md:mt-0">&copy; 2025 swm.cc, Made with ❤️ in NI.</p>
+    </div>
+  </div>
+</footer>
+
   </body>
 </html>
