@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  resource :session, only: [:new, :create, :destroy]
+  resources :users, only: [:new, :create]
+
+  get 'sign_in', to: 'sessions#new'
+  get 'sign_up', to: 'users#new'
+  delete 'sign_out', to: 'sessions#destroy', as: :sign_out
+
   get "pages/random_recipe"
   resources :recipes
   resources :categories
