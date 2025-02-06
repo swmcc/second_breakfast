@@ -136,3 +136,5 @@ recipes.each do |recipe_data|
 end
 
 puts "Seeded #{Category.count} categories and #{Recipe.count} recipes!"
+
+User.create!(email: "me@swm.cc", password: "pass5577")
