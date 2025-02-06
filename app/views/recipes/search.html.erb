@@ -1,0 +1,28 @@
+<% if @recipes.any? %>
+  <ul class="space-y-6">
+    <% @recipes.each do |recipe| %>
+      <li class="flex items-start space-x-4">
+        <!-- Thumbnail Image -->
+        <% if recipe.image.attached? %>
+          <%= link_to recipe_path(recipe), class: "flex-shrink-0" do %>
+            <%= image_tag recipe.image.variant(resize_to_fill: [100, 100]), class: "w-20 h-20 object-cover rounded-md" %>
+          <% end %>
+        <% else %>
+          <div class="w-20 h-20 bg-gray-200 rounded-md"></div>
+        <% end %>
+
+        <!-- Recipe Info -->
+        <div class="flex-grow">
+          <%= link_to recipe_path(recipe), class: "text-gray-900 hover:text-indigo-600 font-medium text-lg" do %>
+            <%= recipe.title %>
+          <% end %>
+          <p class="text-gray-600 text-sm mt-1">
+            <%= truncate(recipe.description, length: 60, separator: ' ') %>
+          </p>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% elsif params[:query].present? %>
+  <p class="text-gray-500 text-sm">No recipes found matching your search.</p>
+<% end %>

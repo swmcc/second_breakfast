@@ -57,6 +57,15 @@ class RecipesController < ApplicationController
     end
   end
 
+  def search
+    puts "params[:query]: #{params[:query]}"
+    if params[:query].present?
+      @recipes = Recipe.where("title LIKE ?", "%#{params[:query]}%")
+    else
+      @recipes = []
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_recipe
