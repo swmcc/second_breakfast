@@ -1,7 +1,9 @@
 class Recipe < ApplicationRecord
   belongs_to :category  
-  
+
   has_rich_text :instructions
+
+  has_one_attached :image
   
   validates :title, :description, :serves, :instructions, :prep_time, :ingredients, :nutrition, presence: true
 

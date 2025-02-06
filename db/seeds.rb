@@ -123,7 +123,7 @@ categories = ["Breakfast", "Main Course", "Dessert"].map do |name|
 end
 
 recipes.each do |recipe_data|
-  Recipe.create!(
+  recipe = Recipe.create!(
     title: recipe_data[:title],
     description: recipe_data[:description],
     serves: recipe_data[:serves],
@@ -133,6 +133,13 @@ recipes.each do |recipe_data|
     nutrition: recipe_data[:nutrition],
     category: categories.sample
   )
+
+  image_path = Rails.root.join("app/assets/images/recipes", "#{recipe.title.parameterize.underscore}.png")
+  if File.exist?(image_path)
+    recipe.image.attach(io: File.open(image_path), filename: "#{recipe.title.parameterize.underscore}.png", content_type: "image/png")
+  else
+    puts "Image not found for #{recipe.title} at #{image_path}"
+  end
 end
 
 puts "Seeded #{Category.count} categories and #{Recipe.count} recipes!"

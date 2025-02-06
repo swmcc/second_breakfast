@@ -33,6 +33,11 @@
 </div>
 
 <div class="my-5">
+  <%= form.label :image, "Upload Image" %>
+  <%= form.file_field :image, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
+</div>
+
+<div class="my-5">
   <%= form.label :instructions %>
   <%= form.rich_text_area :instructions, rows: 4, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
 </div>
