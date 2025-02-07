@@ -32,17 +32,17 @@ production:
     <<: *default
     adapter: postgresql
     encoding: unicode
+    database: <%= ENV['CACHE_DATABASE_URL'] %>
     migrations_paths: db/cache_migrate
-    database: <%= ENV['DATABASE_URL'] %>
   queue:
     <<: *default
     adapter: postgresql
     encoding: unicode
-    database: <%= ENV['DATABASE_URL'] %>
+    database: <%= ENV['QUEUE_DATABASE_URL'] %>
     migrations_paths: db/queue_migrate
   cable:
     <<: *default
     adapter: postgresql
     encoding: unicode
-    database: <%= ENV['DATABASE_URL'] %>
+    database: <%= ENV['CABLE_DATABASE_URL'] %>
     migrations_paths: db/cable_migrate
