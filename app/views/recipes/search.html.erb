@@ -1,28 +1,61 @@
-<% if @recipes.any? %>
-  <ul class="space-y-6">
-    <% @recipes.each do |recipe| %>
-      <li class="flex items-start space-x-4">
-        <!-- Thumbnail Image -->
-        <% if recipe.image.attached? %>
-          <%= link_to recipe_path(recipe), class: "flex-shrink-0" do %>
-            <%= image_tag recipe.image.variant(resize_to_fill: [100, 100]), class: "w-20 h-20 object-cover rounded-md" %>
-          <% end %>
-        <% else %>
-          <div class="w-20 h-20 bg-gray-200 rounded-md"></div>
-        <% end %>
+<% if params[:query].present? %>
+  <% if @recipes.any? %>
+    <div class="mb-8">
+      <ul class="space-y-6">
+        <% @recipes.each do |recipe| %>
+          <li class="border-b pb-4 flex flex-col sm:flex-row items-start space-x-4">
+            <!-- Thumbnail Image -->
+            <% if recipe.image.attached? %>
+              <%= link_to recipe_path(recipe), class: "flex-shrink-0" do %>
+                <%= image_tag recipe.image.variant(resize_to_fill: [150, 150]), class: "w-36 h-36 object-cover rounded-md" %>
+              <% end %>
+            <% else %>
+              <div class="w-36 h-36 bg-gray-200 rounded-md"></div>
+            <% end %>
 
-        <!-- Recipe Info -->
-        <div class="flex-grow">
-          <%= link_to recipe_path(recipe), class: "text-gray-900 hover:text-indigo-600 font-medium text-lg" do %>
-            <%= recipe.title %>
-          <% end %>
-          <p class="text-gray-600 text-sm mt-1">
-            <%= truncate(recipe.description, length: 60, separator: ' ') %>
-          </p>
-        </div>
-      </li>
-    <% end %>
-  </ul>
-<% elsif params[:query].present? %>
-  <p class="text-gray-500 text-sm">No recipes found matching your search.</p>
+            <!-- Recipe Info (Title, Description, Ingredients) -->
+            <div class="flex-grow">
+              <div>
+                <%= link_to recipe_path(recipe), class: "text-lg font-semibold text-blue-600 hover:underline" do %>
+                  <%= recipe.title %>
+                <% end %>
+              </div>
+
+              <p class="text-gray-600 text-sm mt-1">
+                <span class="font-medium">Description:</span> 
+                <%= truncate(recipe.description, length: 100, separator: ' ') %>
+              </p>
+
+              <p class="text-gray-600 text-sm mt-1">
+                <span class="font-medium">Ingredients:</span> 
+                <ul class="list-disc ml-5">
+                  <% recipe.ingredients.each do |ingredient| %>
+                    <li>
+                      <% if ingredient["name"].downcase.include?(params[:query].downcase) %>
+                        <strong><%= ingredient["name"] %></strong>
+                      <% else %>
+                        <%= ingredient["name"] %>
+                      <% end %>
+                      - <%= ingredient["quantity"] %> <%= ingredient["unit"] %>
+                    </li>
+                  <% end %>
+                </ul>
+              </p>
+              <p class="text-gray-500 text-xs mt-2">
+                <span class="font-medium">Category:</span> <%= recipe.category.name if recipe.category %> |
+                <span class="font-medium">Prep Time:</span> <%= recipe.prep_time %>
+                <span class="font-medium">Cals:</span> <%= recipe.nutrition['calories'] %>
+              </p>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if @recipes.empty? %>
+    <div class="mt-6 text-gray-500 text-sm">
+      <p>No results found for "<%= params[:query] %>". Try searching with different keywords.</p>
+    </div>
+  <% end %>
 <% end %>

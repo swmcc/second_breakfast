@@ -60,7 +60,13 @@ class RecipesController < ApplicationController
 
   def search
     if params[:query].present?
-      @recipes = Recipe.where("LOWER(title) LIKE LOWER(?)", "%#{params[:query]}%")
+      query = "%#{params[:query]}%"
+  
+      if ActiveRecord::Base.connection.adapter_name.downcase.include?("postgresql")
+        @recipes = Recipe.where("LOWER(title) LIKE LOWER(?) OR LOWER(ingredients::text) LIKE LOWER(?)", query, query)
+      else
+        @recipes = Recipe.where("LOWER(title) LIKE LOWER(?) OR LOWER(json_extract(ingredients, '$')) LIKE LOWER(?)", query, query)
+      end
     else
       @recipes = []
     end
