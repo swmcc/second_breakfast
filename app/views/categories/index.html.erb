@@ -5,11 +5,12 @@
     <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
   <% end %>
 
+  <% if signed_in? %>
   <div class="flex justify-between items-center">
     <h1 class="font-bold text-4xl">Recipe Categories</h1>
     <%= link_to "New category", new_category_path, class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
   </div>
-
+  <% end %>
   <div id="categories" class="min-w-full mt-8">
     <% if @categories.any? %>
       <div class="space-y-8">

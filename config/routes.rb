@@ -3,7 +3,6 @@ Rails.application.routes.draw do
   resources :users, only: [:new, :create]
 
   get 'sign_in', to: 'sessions#new'
-  get 'sign_up', to: 'users#new'
   delete 'sign_out', to: 'sessions#destroy', as: :sign_out
 
   get "pages/random_recipe"
