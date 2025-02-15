@@ -59,9 +59,8 @@ class RecipesController < ApplicationController
   end
 
   def search
-    puts "params[:query]: #{params[:query]}"
     if params[:query].present?
-      @recipes = Recipe.where("title LIKE ?", "%#{params[:query]}%")
+      @recipes = Recipe.where("LOWER(title) LIKE LOWER(?)", "%#{params[:query]}%")
     else
       @recipes = []
     end
