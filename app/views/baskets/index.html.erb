@@ -47,7 +47,20 @@
             </div>
           </div>
         <% end %>
+
+
+      <% if current_user.baskets.any? %>
+        <div class="mt-8">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Shopping List</h2>
+          <div class="bg-white shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <div class="px-6 py-5">
+  <ul>
+  <% current_user.aggregated_ingredients.each do |ingredient| %>
+    <li><%= ingredient[:name].capitalize %>: <%= ingredient[:quantity] %> <%= ingredient[:unit] %></li>
+  <% end %>
+  </ul>
       </div>
     </div>
+    <% end %>
   </div>
 </div>
