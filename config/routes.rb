@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   resources :categories
   resources :baskets, only: [:create, :destroy]
   post 'baskets/toggle', to: 'baskets#toggle', as: 'toggle_basket'
+  get 'chosen_meals', to: 'baskets#index', as: 'basket_index'
 
 
   get "up" => "rails/health#show", as: :rails_health_check
