@@ -11,7 +11,7 @@ class Recipe < ApplicationRecord
   validates :title, :description, :serves, :instructions, :prep_time, :ingredients, :nutrition, presence: true
 
   validate :validate_nutrition_format
-
+  
   private
 
   def validate_nutrition_format
