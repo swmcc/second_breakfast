@@ -8,6 +8,24 @@
   <%= render @recipe %>
 
   <div class="flex flex-wrap gap-4 mt-6">
+  <% if signed_in? %>
+    <% basket = current_user.baskets.find_by(recipe: @recipe) %>
+
+    <% if basket %>
+      <%= button_to toggle_basket_path(recipe_id: @recipe.id), 
+          method: :post,
+          class: "rounded-md px-3.5 py-2.5 bg-green-500 hover:bg-green-400 text-white font-medium inline-flex items-center" do %>
+        <span>🍽️ Chosen</span>
+      <% end %>
+    <% else %>
+      <%= button_to toggle_basket_path(recipe_id: @recipe.id), 
+          method: :post,
+          class: "rounded-md px-3.5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white font-medium inline-flex items-center" do %>
+        <span>Choose this</span>
+      <% end %>
+    <% end %>
+  <% end %>
+
     <% if signed_in? %>
       <%= link_to edit_recipe_path(@recipe), class: "rounded-md px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium inline-flex items-center" do %>
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

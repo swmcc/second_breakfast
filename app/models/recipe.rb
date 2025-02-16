@@ -1,6 +1,9 @@
 class Recipe < ApplicationRecord
   belongs_to :category  
 
+  has_many :baskets, dependent: :destroy
+  has_many :users, through: :baskets
+
   has_rich_text :instructions
 
   has_one_attached :image

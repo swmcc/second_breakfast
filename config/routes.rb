@@ -13,6 +13,8 @@ Rails.application.routes.draw do
   end
 
   resources :categories
+  resources :baskets, only: [:create, :destroy]
+  post 'baskets/toggle', to: 'baskets#toggle', as: 'toggle_basket'
 
 
   get "up" => "rails/health#show", as: :rails_health_check
