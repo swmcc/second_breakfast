@@ -7,6 +7,6 @@ class AddBasketModel < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :baskets, [:user_id, :recipe_id], unique: true
+    add_index :baskets, [ :user_id, :recipe_id ], unique: true
   end
 end

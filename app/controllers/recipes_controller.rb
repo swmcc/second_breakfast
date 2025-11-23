@@ -1,5 +1,5 @@
 class RecipesController < ApplicationController
-  before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy]
+  before_action :authenticate_user!, only: [ :new, :create, :edit, :update, :destroy ]
   before_action :set_recipe, only: %i[ show edit update destroy ]
 
   # GET /recipes or /recipes.json
@@ -61,7 +61,7 @@ class RecipesController < ApplicationController
   def search
     if params[:query].present?
       query = "%#{params[:query]}%"
-  
+
       if ActiveRecord::Base.connection.adapter_name.downcase.include?("postgresql")
         @recipes = Recipe.where("LOWER(title) LIKE LOWER(?) OR LOWER(ingredients::text) LIKE LOWER(?)", query, query)
       else
@@ -88,7 +88,7 @@ class RecipesController < ApplicationController
     :prep_time,
     :category_id,
     :image,
-    ingredients: [:name, :quantity, :unit] # Nested attribute for ingredients
+    ingredients: [ :name, :quantity, :unit ] # Nested attribute for ingredients
   )
 
   # Manually handle nutrition fields

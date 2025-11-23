@@ -1,5 +1,5 @@
 class Recipe < ApplicationRecord
-  belongs_to :category  
+  belongs_to :category
 
   has_many :baskets, dependent: :destroy
   has_many :users, through: :baskets
@@ -7,11 +7,11 @@ class Recipe < ApplicationRecord
   has_rich_text :instructions
 
   has_one_attached :image
-  
+
   validates :title, :description, :serves, :instructions, :prep_time, :ingredients, :nutrition, presence: true
 
   validate :validate_nutrition_format
-  
+
   private
 
   def validate_nutrition_format

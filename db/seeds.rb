@@ -118,7 +118,7 @@ recipes = [
   }
 ]
 
-categories = ["Breakfast", "Main Course", "Dessert"].map do |name|
+categories = [ "Breakfast", "Main Course", "Dessert" ].map do |name|
   Category.create!(name: name)
 end
 

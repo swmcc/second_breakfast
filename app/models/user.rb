@@ -15,15 +15,15 @@ class User < ApplicationRecord
 
     if db_adapter.include?("sqlite")
       recipes.joins("JOIN json_each(recipes.ingredients) AS ingredient")
-             .select("ingredient.value ->> '$.name' AS name, 
-                      SUM(CAST(ingredient.value ->> '$.quantity' AS NUMERIC)) AS total_quantity, 
+             .select("ingredient.value ->> '$.name' AS name,
+                      SUM(CAST(ingredient.value ->> '$.quantity' AS NUMERIC)) AS total_quantity,
                       ingredient.value ->> '$.unit' AS unit")
              .group("name, unit")
              .map { |record| { name: record.name, quantity: record.total_quantity.to_f, unit: record.unit } }
     else
       recipes.joins("CROSS JOIN LATERAL jsonb_array_elements(recipes.ingredients::jsonb) AS ingredient")
-             .select("ingredient->>'name' AS name, 
-                      SUM((ingredient->>'quantity')::NUMERIC) AS total_quantity, 
+             .select("ingredient->>'name' AS name,
+                      SUM((ingredient->>'quantity')::NUMERIC) AS total_quantity,
                       ingredient->>'unit' AS unit")
              .group("ingredient->>'name', ingredient->>'unit'")
              .map { |record| { name: record.name, quantity: record.total_quantity.to_f, unit: record.unit } }
