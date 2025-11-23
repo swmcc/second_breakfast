@@ -1,30 +1,29 @@
 # app/controllers/baskets_controller.rb
-# app/controllers/baskets_controller.rb
 class BasketsController < ApplicationController
-    before_action :authenticate_user!
+  before_action :authenticate_user!
   before_action :set_recipe
-  
-    def create
-      current_user.baskets.create(recipe: @recipe)
-      redirect_to recipes_path, notice: "Recipe added to your basket!"
-    end
-  
-    def destroy
+
+  def create
+    current_user.baskets.create(recipe: @recipe)
+    redirect_to recipes_path, notice: "Recipe added to your basket!"
+  end
+
+  def destroy
     basket = find_basket
     basket&.destroy
-      redirect_to recipes_path, notice: "Recipe removed from your basket!"
-    end
-  
-    def toggle
+    redirect_to recipes_path, notice: "Recipe removed from your basket!"
+  end
+
+  def toggle
     basket = find_basket
-      if basket
-        basket.destroy
+    if basket
+      basket.destroy
       flash_message = "Recipe removed from your basket!"
-      else
-        current_user.baskets.create(recipe: @recipe)
+    else
+      current_user.baskets.create(recipe: @recipe)
       flash_message = "Recipe added to your basket!"
-      end
-  
+    end
+
     redirect_to recipes_path, notice: flash_message
   end
 
@@ -40,6 +39,3 @@ class BasketsController < ApplicationController
     current_user.baskets.find_by(recipe: @recipe)
   end
 end
-      redirect_to recipes_path
-    end
-  end
