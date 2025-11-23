@@ -13,6 +13,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install libvips
+        run: sudo apt-get update && sudo apt-get install -y libvips-dev
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -29,6 +32,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install libvips
+        run: sudo apt-get update && sudo apt-get install -y libvips-dev
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -43,6 +49,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install libvips
+        run: sudo apt-get update && sudo apt-get install -y libvips-dev
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
