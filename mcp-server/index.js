@@ -99,23 +99,23 @@ server.tool(
 // Create recipe tool
 server.tool(
   "create_recipe",
-  "Create a new recipe in Second Breakfast",
+  "Create a new recipe in Second Breakfast. IMPORTANT: For ingredients, put ONLY the ingredient name in 'name' (e.g., 'bell peppers' not 'bell peppers, halved'). Put prep instructions like 'halved', 'chopped', 'minced' in the main instructions field instead. Use standard units only (g, kg, ml, l, cups, tbsp, tsp, whole, pinch).",
   {
     title: z.string().describe("Recipe title"),
     description: z.string().describe("Brief description of the recipe"),
     serves: z.number().describe("Number of servings"),
     prep_time: z.string().describe("Preparation time (e.g., '30 minutes')"),
     category_id: z.number().describe("Category ID (use list_categories to find)"),
-    instructions: z.string().describe("Step-by-step cooking instructions"),
+    instructions: z.string().describe("Step-by-step cooking instructions. Include ingredient prep details here (e.g., 'Dice the onion, mince the garlic...')"),
     ingredients: z
       .array(
         z.object({
-          name: z.string().describe("Ingredient name"),
-          quantity: z.string().describe("Amount needed"),
-          unit: z.string().describe("Unit of measurement (cups, tbsp, g, etc.)"),
+          name: z.string().describe("Ingredient name ONLY - no prep instructions (e.g., 'onion' not 'onion, diced')"),
+          quantity: z.string().describe("Numeric amount (e.g., '2', '100', '0.5')"),
+          unit: z.string().describe("Standard unit ONLY: g, kg, ml, l, cups, tbsp, tsp, whole, pinch, to taste"),
         })
       )
-      .describe("List of ingredients"),
+      .describe("List of ingredients with simple names and standard units"),
     nutrition: z
       .object({
         calories: z.string().describe("Calories per serving"),
