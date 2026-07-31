@@ -230,44 +230,52 @@ server.tool(
       .describe("Auto-fetch an image from the web based on recipe title. Defaults to true. Set to false to skip."),
   },
   async ({ title, description, serves, prep_time, category_id, instructions, ingredients, nutrition, image_data, fetch_image }) => {
-    const recipeData = {
-      title,
-      description,
-      serves,
-      prep_time,
-      category_id,
-      instructions,
-      ingredients,
-      nutrition,
-    };
+    console.error(`[create_recipe] Starting: ${title}`);
 
-    // Use provided image or fetch from DuckDuckGo
-    // Default to fetching if fetch_image is not explicitly false
-    const shouldFetch = fetch_image !== false;
-    console.error(`Image fetch: provided=${!!image_data}, fetch_image=${fetch_image}, shouldFetch=${shouldFetch}`);
+    try {
+      const recipeData = {
+        title,
+        description,
+        serves,
+        prep_time,
+        category_id,
+        instructions,
+        ingredients,
+        nutrition,
+      };
 
-    let finalImageData = image_data;
-    if (!finalImageData && shouldFetch) {
-      console.error(`Fetching image for: ${title}`);
-      finalImageData = await fetchRecipeImage(title);
-      console.error(`Image result: ${finalImageData ? 'got image' : 'no image'}`);
+      // Always fetch image unless explicitly set to false or image already provided
+      console.error(`[create_recipe] image_data=${!!image_data}, fetch_image=${fetch_image}`);
+
+      let finalImageData = image_data;
+      if (!finalImageData && fetch_image !== false) {
+        console.error(`[create_recipe] Fetching image for: ${title}`);
+        finalImageData = await fetchRecipeImage(title);
+        console.error(`[create_recipe] Image result: ${finalImageData ? 'success (' + finalImageData.length + ' chars)' : 'failed'}`);
+      }
+
+      if (finalImageData) {
+        recipeData.image_data = finalImageData;
+      }
+
+      const recipe = { recipe: recipeData };
+
+      console.error(`[create_recipe] Calling API...`);
+      const data = await apiRequest("POST", "/recipes", recipe);
+      console.error(`[create_recipe] Success! Recipe ID: ${data.id}`);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Recipe "${data.title}" created successfully with ID ${data.id}.\n\n${JSON.stringify(data, null, 2)}`,
+          },
+        ],
+      };
+    } catch (error) {
+      console.error(`[create_recipe] ERROR: ${error.message}`);
+      throw error;
     }
-
-    if (finalImageData) {
-      recipeData.image_data = finalImageData;
-    }
-
-    const recipe = { recipe: recipeData };
-
-    const data = await apiRequest("POST", "/recipes", recipe);
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Recipe "${data.title}" created successfully with ID ${data.id}.\n\n${JSON.stringify(data, null, 2)}`,
-        },
-      ],
-    };
   }
 );
 
