@@ -7,6 +7,67 @@ import { z } from "zod";
 const API_URL = process.env.API_URL || "http://localhost:3000/api/v1";
 const API_TOKEN = process.env.API_TOKEN || "";
 
+async function fetchGoogleImage(query) {
+  try {
+    const searchQuery = encodeURIComponent(query + " recipe food");
+    const url = `https://www.google.com/search?q=${searchQuery}&tbm=isch&safe=active`;
+
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Google search failed:", response.status);
+      return null;
+    }
+
+    const html = await response.text();
+
+    // Extract image URLs from the page - Google embeds them in data attributes and scripts
+    const imgRegex = /\["(https:\/\/[^"]+\.(?:jpg|jpeg|png|webp))",\d+,\d+\]/gi;
+    const matches = [...html.matchAll(imgRegex)];
+
+    if (matches.length === 0) {
+      // Try alternate pattern
+      const altRegex = /"ou":"(https:\/\/[^"]+)"/gi;
+      const altMatches = [...html.matchAll(altRegex)];
+      if (altMatches.length === 0) {
+        console.error("No images found in Google results");
+        return null;
+      }
+      matches.push(...altMatches);
+    }
+
+    // Get a decent sized image (skip tiny thumbnails)
+    const imageUrl = matches[0][1];
+    console.error("Fetching image:", imageUrl);
+
+    const imageResponse = await fetch(imageUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Referer": "https://www.google.com/",
+      },
+    });
+
+    if (!imageResponse.ok) {
+      console.error("Failed to fetch image:", imageResponse.status);
+      return null;
+    }
+
+    const contentType = imageResponse.headers.get("content-type") || "image/jpeg";
+    const arrayBuffer = await imageResponse.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
+    return `data:${contentType};base64,${base64}`;
+  } catch (error) {
+    console.error("Google image fetch error:", error.message);
+    return null;
+  }
+}
+
 async function apiRequest(method, path, body = null) {
   const url = `${API_URL}${path}`;
   const headers = {
@@ -131,8 +192,13 @@ server.tool(
       .string()
       .optional()
       .describe("Optional base64-encoded image data URL (e.g., 'data:image/jpeg;base64,...'). Use this to attach a photo of the recipe."),
+    fetch_image: z
+      .boolean()
+      .optional()
+      .default(true)
+      .describe("Auto-fetch an image from Google Images based on recipe title. Defaults to true. Set to false to skip."),
   },
-  async ({ title, description, serves, prep_time, category_id, instructions, ingredients, nutrition, image_data }) => {
+  async ({ title, description, serves, prep_time, category_id, instructions, ingredients, nutrition, image_data, fetch_image }) => {
     const recipeData = {
       title,
       description,
@@ -144,8 +210,15 @@ server.tool(
       nutrition,
     };
 
-    if (image_data) {
-      recipeData.image_data = image_data;
+    // Use provided image or fetch from Google
+    let finalImageData = image_data;
+    if (!finalImageData && fetch_image !== false) {
+      console.error(`Fetching image for: ${title}`);
+      finalImageData = await fetchGoogleImage(title);
+    }
+
+    if (finalImageData) {
+      recipeData.image_data = finalImageData;
     }
 
     const recipe = { recipe: recipeData };
