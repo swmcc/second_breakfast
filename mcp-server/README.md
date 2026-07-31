@@ -92,7 +92,7 @@ Get full details of a recipe by ID.
 
 ### `create_recipe`
 
-Create a new recipe with all fields.
+Create a new recipe with all fields. An image is automatically fetched in the background based on the recipe title.
 
 **Parameters:**
 - `title` (string) - Recipe title
@@ -103,6 +103,10 @@ Create a new recipe with all fields.
 - `instructions` (string) - Cooking instructions
 - `ingredients` (array) - List of {name, quantity, unit}
 - `nutrition` (object) - {calories, protein, fat, carbs, fibre, sugar, sodium}
+- `image_data` (string, optional) - Base64-encoded image data URL
+- `fetch_image` (boolean, optional) - Auto-fetch image (default: true)
+
+**Note:** Recipe creation returns immediately. The image is fetched asynchronously by a background job and will appear shortly after.
 
 ## Example Workflows
 

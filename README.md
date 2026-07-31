@@ -92,6 +92,61 @@ db/                 # Migrations and seeds
 - **categories** - Recipe categorization
 - **baskets** - User recipe selections (join table)
 
+## Creating Recipes
+
+There are three ways to create recipes in Second Breakfast:
+
+### 1. Web UI
+
+The simplest way - just fill in the form at `/recipes/new`.
+
+![Web UI Recipe Creation](docs/images/second_brekfast_webui.png)
+
+### 2. REST API
+
+Create recipes programmatically via the API. Requires authentication.
+
+![API Recipe Creation](docs/images/second_breakfast_api_post.png)
+
+```bash
+curl -X POST http://localhost:3000/api/v1/recipes \
+  -H "Authorization: Bearer your-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "recipe": {
+      "title": "Pancakes",
+      "description": "Fluffy breakfast pancakes",
+      "serves": 4,
+      "prep_time": "20 minutes",
+      "category_id": 1,
+      "instructions": "Mix ingredients. Cook on griddle.",
+      "ingredients": [
+        {"name": "flour", "quantity": "200", "unit": "g"},
+        {"name": "eggs", "quantity": "2", "unit": "whole"}
+      ],
+      "nutrition": {
+        "calories": "250", "protein": "8", "fat": "5",
+        "carbs": "40", "fibre": "2", "sugar": "10", "sodium": "300"
+      }
+    }
+  }'
+```
+
+An image will be automatically fetched in the background based on the recipe title.
+
+### 3. MCP Server (Claude Integration)
+
+The fastest way to import recipes - take a photo and let Claude do the work.
+
+![MCP Recipe Creation](docs/images/second_breakfast_mcp.png)
+
+1. Take a photo of a recipe from a cookbook
+2. Send it to Claude Desktop with the MCP server configured
+3. Ask: "Create a recipe from this photo"
+4. Claude extracts all details and creates the recipe instantly
+
+See [MCP Server documentation](mcp-server/README.md) for setup instructions.
+
 ## API
 
 Interactive API documentation available at [/api-docs](/api-docs) (Swagger UI).
