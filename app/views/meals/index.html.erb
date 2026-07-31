@@ -1,0 +1,107 @@
+<div class="w-full px-4 sm:px-6 lg:px-8 py-12">
+  <div class="flex items-center justify-between">
+    <div class="flex-auto">
+      <h1 class="text-2xl font-semibold leading-6 text-gray-900">Meal Plan</h1>
+      <p class="mt-2 text-sm text-gray-700">Your selected meals and shopping list.</p>
+    </div>
+    <% if @baskets.any? %>
+      <div class="flex gap-x-2">
+        <button onclick="window.print()" class="inline-flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
+          </svg>
+          Print
+        </button>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mt-8">
+    <% if @baskets.any? %>
+      <%# Meals Grid %>
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <% @baskets.each do |basket| %>
+          <div class="group relative bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <%= link_to recipe_path(basket.recipe), class: "block" do %>
+              <div class="aspect-[4/3] overflow-hidden">
+                <% if basket.recipe.image.attached? %>
+                  <%= image_tag basket.recipe.image, class: "h-full w-full object-cover group-hover:scale-105 transition-transform duration-200" %>
+                <% else %>
+                  <div class="h-full w-full bg-gray-100 flex items-center justify-center">
+                    <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+            <div class="p-4">
+              <h3 class="text-lg font-semibold text-gray-900"><%= basket.recipe.title %></h3>
+              <p class="mt-1 text-sm text-gray-500 line-clamp-2"><%= basket.recipe.description %></p>
+              <div class="mt-3 flex items-center gap-x-4 text-sm text-gray-500">
+                <div class="flex items-center gap-x-1">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  </svg>
+                  <span>Serves <%= basket.recipe.serves %></span>
+                </div>
+                <div class="flex items-center gap-x-1">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span><%= basket.recipe.prep_time %></span>
+                </div>
+              </div>
+              <div class="mt-4 flex justify-end">
+                <%= button_to toggle_meal_path(recipe_id: basket.recipe.id),
+                    method: :post,
+                    class: "text-sm font-medium text-red-600 hover:text-red-500" do %>
+                  Remove
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Shopping List %>
+      <div class="mt-12 print:mt-8" data-controller="clipboard">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold text-gray-900">Shopping List</h2>
+          <button type="button"
+                  data-action="click->clipboard#copy"
+                  data-clipboard-target="button"
+                  class="inline-flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 print:hidden">
+            <svg class="h-4 w-4" data-clipboard-target="icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+            </svg>
+            <span data-clipboard-target="text">Copy list</span>
+          </button>
+        </div>
+        <div class="bg-white shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+          <ul class="divide-y divide-gray-200 px-6 py-4" data-clipboard-target="content">
+            <% @aggregated_ingredients.each do |ingredient| %>
+              <li class="py-2 flex justify-between">
+                <span class="text-gray-900"><%= ingredient[:name].capitalize %></span>
+                <span class="text-gray-500"><%= ingredient[:quantity] %> <%= ingredient[:unit] %></span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No meals planned</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by adding some recipes to your meal plan.</p>
+        <div class="mt-6">
+          <%= link_to recipes_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" do %>
+            Browse Recipes
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
