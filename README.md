@@ -126,6 +126,43 @@ user = User.find_by(email: "your@email.com")
 user.generate_api_token!
 ```
 
+## MCP Server (Claude Integration)
+
+An MCP server is included for integrating with Claude, enabling rapid recipe import from photos.
+
+### Quick Start
+
+```bash
+cd mcp-server
+npm install
+```
+
+Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "second-breakfast": {
+      "command": "node",
+      "args": ["/path/to/second_breakfast/mcp-server/index.js"],
+      "env": {
+        "API_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
+
+### Example Usage
+
+Take a photo of a recipe and ask Claude:
+
+> "Create a recipe from this photo of my cookbook"
+
+Claude will extract the recipe details and create it using the MCP server.
+
+See [mcp-server/README.md](mcp-server/README.md) for full documentation.
+
 ## Deployment
 
 Deployed using Kamal with Docker containers. See `config/deploy.yml` for configuration.
