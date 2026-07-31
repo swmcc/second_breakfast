@@ -8,6 +8,9 @@ const API_URL = process.env.API_URL || "http://localhost:3000/api/v1";
 const API_TOKEN = process.env.API_TOKEN || "";
 
 async function fetchRecipeImage(query) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
   try {
     const searchQuery = encodeURIComponent(query + " recipe");
 
@@ -17,6 +20,7 @@ async function fetchRecipeImage(query) {
       headers: {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       },
+      signal: controller.signal,
     });
 
     if (!tokenResponse.ok) {
@@ -38,6 +42,7 @@ async function fetchRecipeImage(query) {
       headers: {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       },
+      signal: controller.signal,
     });
 
     if (!apiResponse.ok) {
@@ -51,13 +56,16 @@ async function fetchRecipeImage(query) {
       return null;
     }
 
-    const imageUrl = data.results[0].image;
-    console.error("Fetching image:", imageUrl);
+    // Find a reasonably sized image (under 1000px wide, skip huge ones)
+    const result = data.results.find(r => r.width && r.width < 1200 && r.width > 300) || data.results[0];
+    const imageUrl = result.image;
+    console.error("Fetching image:", imageUrl, `(${result.width}x${result.height})`);
 
     const imageResponse = await fetch(imageUrl, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       },
+      signal: controller.signal,
     });
 
     if (!imageResponse.ok) {
@@ -67,11 +75,25 @@ async function fetchRecipeImage(query) {
 
     const contentType = imageResponse.headers.get("content-type") || "image/jpeg";
     const arrayBuffer = await imageResponse.arrayBuffer();
+
+    // Skip if too large (over 2MB)
+    if (arrayBuffer.byteLength > 2000000) {
+      console.error("Image too large, skipping:", Math.round(arrayBuffer.byteLength / 1024), "KB");
+      return null;
+    }
+    console.error("Image size:", Math.round(arrayBuffer.byteLength / 1024), "KB");
+
     const base64 = Buffer.from(arrayBuffer).toString("base64");
     return `data:${contentType};base64,${base64}`;
   } catch (error) {
-    console.error("Image fetch error:", error.message);
+    if (error.name === "AbortError") {
+      console.error("Image fetch timed out");
+    } else {
+      console.error("Image fetch error:", error.message);
+    }
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
