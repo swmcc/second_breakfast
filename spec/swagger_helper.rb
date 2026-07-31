@@ -11,7 +11,21 @@ RSpec.configure do |config|
       info: {
         title: "Second Breakfast API",
         version: "v1",
-        description: "API for managing recipes, categories, and meal baskets"
+        description: <<~DESC.strip
+          API for managing recipes, categories, and meal baskets.
+
+          ## Authentication
+
+          Some endpoints require authentication via Bearer token. To get a token:
+
+          ```ruby
+          # In Rails console (bin/rails console)
+          user = User.find_by(email: "your@email.com")
+          user.generate_api_token!
+          ```
+
+          Click the **Authorize** button above and enter your token (without "Bearer" prefix).
+        DESC
       },
       paths: {},
       servers: [
