@@ -8,11 +8,13 @@ const API_URL = process.env.API_URL || "http://localhost:3000/api/v1";
 const API_TOKEN = process.env.API_TOKEN || "";
 
 async function fetchRecipeImage(query) {
+  console.error(`[fetchRecipeImage] Starting for: ${query}`);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
   try {
     const searchQuery = encodeURIComponent(query + " recipe");
+    console.error(`[fetchRecipeImage] Searching DuckDuckGo...`);
 
     // First, get the vqd token from DuckDuckGo
     const tokenUrl = `https://duckduckgo.com/?q=${searchQuery}&iax=images&ia=images`;
@@ -240,10 +242,15 @@ server.tool(
     };
 
     // Use provided image or fetch from DuckDuckGo
+    // Default to fetching if fetch_image is not explicitly false
+    const shouldFetch = fetch_image !== false;
+    console.error(`Image fetch: provided=${!!image_data}, fetch_image=${fetch_image}, shouldFetch=${shouldFetch}`);
+
     let finalImageData = image_data;
-    if (!finalImageData && fetch_image !== false) {
+    if (!finalImageData && shouldFetch) {
       console.error(`Fetching image for: ${title}`);
       finalImageData = await fetchRecipeImage(title);
+      console.error(`Image result: ${finalImageData ? 'got image' : 'no image'}`);
     }
 
     if (finalImageData) {
