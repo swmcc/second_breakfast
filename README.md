@@ -92,6 +92,40 @@ db/                 # Migrations and seeds
 - **categories** - Recipe categorization
 - **baskets** - User recipe selections (join table)
 
+## API
+
+Interactive API documentation available at [/api-docs](/api-docs) (Swagger UI).
+
+### Endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/v1/recipes` | No | List recipes (paginated) |
+| GET | `/api/v1/recipes/:id` | No | Show recipe |
+| GET | `/api/v1/recipes/search?query=` | No | Search recipes |
+| POST | `/api/v1/recipes` | Yes | Create recipe |
+| PUT | `/api/v1/recipes/:id` | Yes | Update recipe |
+| DELETE | `/api/v1/recipes/:id` | Yes | Delete recipe |
+| GET | `/api/v1/categories` | No | List categories |
+| GET | `/api/v1/categories/:id` | No | Category with recipes |
+| GET | `/api/v1/baskets` | Yes | User's basket |
+| POST | `/api/v1/baskets` | Yes | Add recipe to basket |
+| DELETE | `/api/v1/baskets/:id` | Yes | Remove from basket |
+
+### Authentication
+
+Authenticated endpoints require a Bearer token in the Authorization header:
+
+```
+Authorization: Bearer your_api_token
+```
+
+Generate an API token via the Rails console:
+```ruby
+user = User.find_by(email: "your@email.com")
+user.generate_api_token!
+```
+
 ## Deployment
 
 Deployed using Kamal with Docker containers. See `config/deploy.yml` for configuration.

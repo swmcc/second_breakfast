@@ -21,6 +21,16 @@ gem "tailwindcss-rails", "~> 3.3.1"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 
+# API Documentation
+gem "rswag-api"
+gem "rswag-ui"
+
+# Pagination
+gem "pagy", "~> 9.0"
+
+# CORS support
+gem "rack-cors"
+
 gem "ruby-vips"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
@@ -61,6 +71,9 @@ group :development, :test do
   gem "factory_bot_rails"
   gem "faker"
   gem "shoulda-matchers"
+
+  # API documentation specs
+  gem "rswag-specs"
 
   # System tests
   gem "capybara"

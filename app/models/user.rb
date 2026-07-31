@@ -6,6 +6,11 @@ class User < ApplicationRecord
 
   validates :email, presence: true, uniqueness: true
 
+  def generate_api_token!
+    update!(api_token: SecureRandom.hex(32))
+    api_token
+  end
+
   def in_basket?(recipe)
     baskets.exists?(recipe: recipe)
   end
