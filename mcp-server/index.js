@@ -127,20 +127,28 @@ server.tool(
         sodium: z.string().describe("Sodium milligrams - NUMBER ONLY (e.g., '200' not '200mg')"),
       })
       .describe("Nutritional information per serving - ALL VALUES MUST BE NUMBERS ONLY without units"),
+    image_data: z
+      .string()
+      .optional()
+      .describe("Optional base64-encoded image data URL (e.g., 'data:image/jpeg;base64,...'). Use this to attach a photo of the recipe."),
   },
-  async ({ title, description, serves, prep_time, category_id, instructions, ingredients, nutrition }) => {
-    const recipe = {
-      recipe: {
-        title,
-        description,
-        serves,
-        prep_time,
-        category_id,
-        instructions,
-        ingredients,
-        nutrition,
-      },
+  async ({ title, description, serves, prep_time, category_id, instructions, ingredients, nutrition, image_data }) => {
+    const recipeData = {
+      title,
+      description,
+      serves,
+      prep_time,
+      category_id,
+      instructions,
+      ingredients,
+      nutrition,
     };
+
+    if (image_data) {
+      recipeData.image_data = image_data;
+    }
+
+    const recipe = { recipe: recipeData };
 
     const data = await apiRequest("POST", "/recipes", recipe);
     return {
