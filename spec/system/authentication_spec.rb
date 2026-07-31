@@ -31,8 +31,9 @@ RSpec.describe "Authentication", type: :system do
   describe "signing out" do
     before { sign_in_as(user) }
 
-    it "allows a user to sign out" do
-      click_link "Sign Out"
+    it "allows a user to sign out via dropdown" do
+      click_button user.email
+      click_link "Sign out"
 
       expect(page).to have_current_path(root_path)
       expect(page).to have_link("Sign In")
