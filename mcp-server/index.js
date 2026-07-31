@@ -7,49 +7,56 @@ import { z } from "zod";
 const API_URL = process.env.API_URL || "http://localhost:3000/api/v1";
 const API_TOKEN = process.env.API_TOKEN || "";
 
-async function fetchGoogleImage(query) {
+async function fetchRecipeImage(query) {
   try {
-    const searchQuery = encodeURIComponent(query + " recipe food");
-    const url = `https://www.google.com/search?q=${searchQuery}&tbm=isch&safe=active`;
+    const searchQuery = encodeURIComponent(query + " recipe");
 
-    const response = await fetch(url, {
+    // First, get the vqd token from DuckDuckGo
+    const tokenUrl = `https://duckduckgo.com/?q=${searchQuery}&iax=images&ia=images`;
+    const tokenResponse = await fetch(tokenUrl, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       },
     });
 
-    if (!response.ok) {
-      console.error("Google search failed:", response.status);
+    if (!tokenResponse.ok) {
+      console.error("DuckDuckGo token fetch failed:", tokenResponse.status);
       return null;
     }
 
-    const html = await response.text();
+    const html = await tokenResponse.text();
+    const vqd = html.match(/vqd=([^&"]+)/)?.[1];
 
-    // Extract image URLs from the page - Google embeds them in data attributes and scripts
-    const imgRegex = /\["(https:\/\/[^"]+\.(?:jpg|jpeg|png|webp))",\d+,\d+\]/gi;
-    const matches = [...html.matchAll(imgRegex)];
-
-    if (matches.length === 0) {
-      // Try alternate pattern
-      const altRegex = /"ou":"(https:\/\/[^"]+)"/gi;
-      const altMatches = [...html.matchAll(altRegex)];
-      if (altMatches.length === 0) {
-        console.error("No images found in Google results");
-        return null;
-      }
-      matches.push(...altMatches);
+    if (!vqd) {
+      console.error("Could not extract DuckDuckGo vqd token");
+      return null;
     }
 
-    // Get a decent sized image (skip tiny thumbnails)
-    const imageUrl = matches[0][1];
+    // Use the images API
+    const apiUrl = `https://duckduckgo.com/i.js?l=us-en&o=json&q=${searchQuery}&vqd=${vqd}&f=,,,,,&p=1`;
+    const apiResponse = await fetch(apiUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+      },
+    });
+
+    if (!apiResponse.ok) {
+      console.error("DuckDuckGo API failed:", apiResponse.status);
+      return null;
+    }
+
+    const data = await apiResponse.json();
+    if (!data.results || data.results.length === 0) {
+      console.error("No images found for:", query);
+      return null;
+    }
+
+    const imageUrl = data.results[0].image;
     console.error("Fetching image:", imageUrl);
 
     const imageResponse = await fetch(imageUrl, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-        "Referer": "https://www.google.com/",
       },
     });
 
@@ -63,7 +70,7 @@ async function fetchGoogleImage(query) {
     const base64 = Buffer.from(arrayBuffer).toString("base64");
     return `data:${contentType};base64,${base64}`;
   } catch (error) {
-    console.error("Google image fetch error:", error.message);
+    console.error("Image fetch error:", error.message);
     return null;
   }
 }
@@ -196,7 +203,7 @@ server.tool(
       .boolean()
       .optional()
       .default(true)
-      .describe("Auto-fetch an image from Google Images based on recipe title. Defaults to true. Set to false to skip."),
+      .describe("Auto-fetch an image from the web based on recipe title. Defaults to true. Set to false to skip."),
   },
   async ({ title, description, serves, prep_time, category_id, instructions, ingredients, nutrition, image_data, fetch_image }) => {
     const recipeData = {
@@ -210,11 +217,11 @@ server.tool(
       nutrition,
     };
 
-    // Use provided image or fetch from Google
+    // Use provided image or fetch from DuckDuckGo
     let finalImageData = image_data;
     if (!finalImageData && fetch_image !== false) {
       console.error(`Fetching image for: ${title}`);
-      finalImageData = await fetchGoogleImage(title);
+      finalImageData = await fetchRecipeImage(title);
     }
 
     if (finalImageData) {
