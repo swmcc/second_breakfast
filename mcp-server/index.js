@@ -118,15 +118,15 @@ server.tool(
       .describe("List of ingredients with simple names and standard units"),
     nutrition: z
       .object({
-        calories: z.string().describe("Calories per serving"),
-        protein: z.string().describe("Protein per serving (e.g., '10g')"),
-        fat: z.string().describe("Fat per serving (e.g., '5g')"),
-        carbs: z.string().describe("Carbohydrates per serving (e.g., '30g')"),
-        fibre: z.string().describe("Fibre per serving (e.g., '3g')"),
-        sugar: z.string().describe("Sugar per serving (e.g., '5g')"),
-        sodium: z.string().describe("Sodium per serving (e.g., '200mg')"),
+        calories: z.string().describe("Calories per serving - NUMBER ONLY, no units (e.g., '250' not '250 kcal')"),
+        protein: z.string().describe("Protein grams - NUMBER ONLY (e.g., '10' not '10g')"),
+        fat: z.string().describe("Fat grams - NUMBER ONLY (e.g., '5' not '5g')"),
+        carbs: z.string().describe("Carbs grams - NUMBER ONLY (e.g., '30' not '30g')"),
+        fibre: z.string().describe("Fibre grams - NUMBER ONLY (e.g., '3' not '3g')"),
+        sugar: z.string().describe("Sugar grams - NUMBER ONLY (e.g., '5' not '5g')"),
+        sodium: z.string().describe("Sodium milligrams - NUMBER ONLY (e.g., '200' not '200mg')"),
       })
-      .describe("Nutritional information per serving"),
+      .describe("Nutritional information per serving - ALL VALUES MUST BE NUMBERS ONLY without units"),
   },
   async ({ title, description, serves, prep_time, category_id, instructions, ingredients, nutrition }) => {
     const recipe = {
