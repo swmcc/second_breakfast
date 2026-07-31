@@ -29,9 +29,11 @@ Rails.application.routes.draw do
   end
 
   resources :categories
-  resources :baskets, only: [ :create, :destroy ]
-  post "baskets/toggle", to: "baskets#toggle", as: "toggle_basket"
-  get "chosen_meals", to: "baskets#index", as: "basket_index"
+
+  # Meal plan routes
+  resources :meals, controller: "meals", only: [ :index, :destroy ]
+  post "meals/toggle", to: "meals#toggle", as: "toggle_meal"
+  get "meal-plan", to: "meals#index", as: "meal_plan"
 
 
   get "up" => "rails/health#show", as: :rails_health_check

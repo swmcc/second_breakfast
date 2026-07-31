@@ -7,9 +7,9 @@ RSpec.describe "Navigation", type: :system do
     context "when signed in" do
       before { sign_in_as(user) }
 
-      it "displays the basket link in the main nav" do
+      it "displays the meal plan link in the main nav" do
         visit root_path
-        expect(page).to have_link(href: basket_index_path)
+        expect(page).to have_link(href: meal_plan_path)
         expect(page).to have_content("0 Meals")
       end
 
