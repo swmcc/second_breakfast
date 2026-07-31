@@ -7,98 +7,6 @@ import { z } from "zod";
 const API_URL = process.env.API_URL || "http://localhost:3000/api/v1";
 const API_TOKEN = process.env.API_TOKEN || "";
 
-async function fetchRecipeImage(query) {
-  console.error(`[fetchRecipeImage] Starting for: ${query}`);
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-  try {
-    const searchQuery = encodeURIComponent(query + " recipe");
-    console.error(`[fetchRecipeImage] Searching DuckDuckGo...`);
-
-    // First, get the vqd token from DuckDuckGo
-    const tokenUrl = `https://duckduckgo.com/?q=${searchQuery}&iax=images&ia=images`;
-    const tokenResponse = await fetch(tokenUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-      },
-      signal: controller.signal,
-    });
-
-    if (!tokenResponse.ok) {
-      console.error("DuckDuckGo token fetch failed:", tokenResponse.status);
-      return null;
-    }
-
-    const html = await tokenResponse.text();
-    const vqd = html.match(/vqd=([^&"]+)/)?.[1];
-
-    if (!vqd) {
-      console.error("Could not extract DuckDuckGo vqd token");
-      return null;
-    }
-
-    // Use the images API
-    const apiUrl = `https://duckduckgo.com/i.js?l=us-en&o=json&q=${searchQuery}&vqd=${vqd}&f=,,,,,&p=1`;
-    const apiResponse = await fetch(apiUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-      },
-      signal: controller.signal,
-    });
-
-    if (!apiResponse.ok) {
-      console.error("DuckDuckGo API failed:", apiResponse.status);
-      return null;
-    }
-
-    const data = await apiResponse.json();
-    if (!data.results || data.results.length === 0) {
-      console.error("No images found for:", query);
-      return null;
-    }
-
-    // Find a reasonably sized image (under 1000px wide, skip huge ones)
-    const result = data.results.find(r => r.width && r.width < 1200 && r.width > 300) || data.results[0];
-    const imageUrl = result.image;
-    console.error("Fetching image:", imageUrl, `(${result.width}x${result.height})`);
-
-    const imageResponse = await fetch(imageUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-      },
-      signal: controller.signal,
-    });
-
-    if (!imageResponse.ok) {
-      console.error("Failed to fetch image:", imageResponse.status);
-      return null;
-    }
-
-    const contentType = imageResponse.headers.get("content-type") || "image/jpeg";
-    const arrayBuffer = await imageResponse.arrayBuffer();
-
-    // Skip if too large (over 2MB)
-    if (arrayBuffer.byteLength > 2000000) {
-      console.error("Image too large, skipping:", Math.round(arrayBuffer.byteLength / 1024), "KB");
-      return null;
-    }
-    console.error("Image size:", Math.round(arrayBuffer.byteLength / 1024), "KB");
-
-    const base64 = Buffer.from(arrayBuffer).toString("base64");
-    return `data:${contentType};base64,${base64}`;
-  } catch (error) {
-    if (error.name === "AbortError") {
-      console.error("Image fetch timed out");
-    } else {
-      console.error("Image fetch error:", error.message);
-    }
-    return null;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
 async function apiRequest(method, path, body = null) {
   const url = `${API_URL}${path}`;
   const headers = {
@@ -222,60 +130,45 @@ server.tool(
     image_data: z
       .string()
       .optional()
-      .describe("Optional base64-encoded image data URL (e.g., 'data:image/jpeg;base64,...'). Use this to attach a photo of the recipe."),
+      .describe("Optional base64-encoded image data URL. If not provided, an image will be fetched automatically in the background."),
     fetch_image: z
       .boolean()
       .optional()
       .default(true)
-      .describe("Auto-fetch an image from the web based on recipe title. Defaults to true. Set to false to skip."),
+      .describe("Auto-fetch an image in the background. Defaults to true. Set to false to skip."),
   },
   async ({ title, description, serves, prep_time, category_id, instructions, ingredients, nutrition, image_data, fetch_image }) => {
-    console.error(`[create_recipe] Starting: ${title}`);
+    const recipeData = {
+      title,
+      description,
+      serves,
+      prep_time,
+      category_id,
+      instructions,
+      ingredients,
+      nutrition,
+      fetch_image: fetch_image !== false,
+    };
 
-    try {
-      const recipeData = {
-        title,
-        description,
-        serves,
-        prep_time,
-        category_id,
-        instructions,
-        ingredients,
-        nutrition,
-      };
-
-      // Always fetch image unless explicitly set to false or image already provided
-      console.error(`[create_recipe] image_data=${!!image_data}, fetch_image=${fetch_image}`);
-
-      let finalImageData = image_data;
-      if (!finalImageData && fetch_image !== false) {
-        console.error(`[create_recipe] Fetching image for: ${title}`);
-        finalImageData = await fetchRecipeImage(title);
-        console.error(`[create_recipe] Image result: ${finalImageData ? 'success (' + finalImageData.length + ' chars)' : 'failed'}`);
-      }
-
-      if (finalImageData) {
-        recipeData.image_data = finalImageData;
-      }
-
-      const recipe = { recipe: recipeData };
-
-      console.error(`[create_recipe] Calling API...`);
-      const data = await apiRequest("POST", "/recipes", recipe);
-      console.error(`[create_recipe] Success! Recipe ID: ${data.id}`);
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Recipe "${data.title}" created successfully with ID ${data.id}.\n\n${JSON.stringify(data, null, 2)}`,
-          },
-        ],
-      };
-    } catch (error) {
-      console.error(`[create_recipe] ERROR: ${error.message}`);
-      throw error;
+    if (image_data) {
+      recipeData.image_data = image_data;
     }
+
+    const recipe = { recipe: recipeData };
+    const data = await apiRequest("POST", "/recipes", recipe);
+
+    const imageNote = !image_data && fetch_image !== false
+      ? " An image will be fetched in the background."
+      : "";
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Recipe "${data.title}" created successfully with ID ${data.id}.${imageNote}\n\n${JSON.stringify(data, null, 2)}`,
+        },
+      ],
+    };
   }
 );
 

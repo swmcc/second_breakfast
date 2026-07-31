@@ -30,6 +30,12 @@ module Api
         @recipe = Recipe.new(recipe_params)
         attach_image if params[:recipe][:image_data].present?
         @recipe.save!
+
+        # Fetch image in background if none provided and not explicitly disabled
+        if !@recipe.image.attached? && params[:recipe][:fetch_image] != false
+          FetchRecipeImageJob.perform_later(@recipe.id, @recipe.title)
+        end
+
         render :show, status: :created
       end
 
