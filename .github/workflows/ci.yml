@@ -43,6 +43,9 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/second_breakfast_test
         run: bin/rails db:schema:load
 
+      - name: Build CSS assets
+        run: bin/rails tailwindcss:build
+
       - name: Run tests
         env:
           RAILS_ENV: test
