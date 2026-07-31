@@ -1,4 +1,20 @@
 Rails.application.routes.draw do
+  mount Rswag::Ui::Engine => "/api-docs"
+  mount Rswag::Api::Engine => "/api-docs"
+
+  # API routes
+  namespace :api do
+    namespace :v1 do
+      resources :recipes, only: [ :index, :show, :create, :update, :destroy ] do
+        collection do
+          get :search
+        end
+      end
+      resources :categories, only: [ :index, :show ]
+      resources :baskets, only: [ :index, :create, :destroy ]
+    end
+  end
+
   resource :session, only: [ :new, :create, :destroy ]
   resources :users, only: [ :new, :create ]
 
