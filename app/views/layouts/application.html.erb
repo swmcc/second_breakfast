@@ -55,9 +55,7 @@
     <div class="flex flex-1 justify-end">
     <div class="flex items-center gap-x-4">
       <% if user_signed_in? %>
-        <span class="text-sm text-gray-500">
-          <%= current_user.email %>
-        </span>
+        <%# Basket link - always visible %>
         <%= link_to basket_index_path, class: "flex items-center gap-x-1 text-gray-500 hover:text-gray-700" do %>
           <div class="relative">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,11 +65,38 @@
           <span class="text-sm font-medium"><%= pluralize(current_user.baskets.count, 'Meal') %></span>
         <% end %>
 
-        <%= link_to "Sign Out", sign_out_path, 
-            class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50",
-            data: { turbo_method: :delete } %>
+        <%# User dropdown menu %>
+        <div class="relative" data-controller="dropdown">
+          <button type="button"
+                  class="flex items-center gap-x-1 text-sm font-semibold text-gray-900 hover:text-gray-600"
+                  data-action="click->dropdown#toggle"
+                  aria-expanded="false"
+                  aria-haspopup="true">
+            <%= current_user.email %>
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+
+          <div class="hidden absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none"
+               data-dropdown-target="menu"
+               role="menu"
+               aria-orientation="vertical"
+               tabindex="-1">
+            <div class="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+              Signed in as<br>
+              <span class="font-medium text-gray-900"><%= current_user.email %></span>
+            </div>
+            <%= link_to sign_out_path,
+                class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100",
+                data: { turbo_method: :delete },
+                role: "menuitem" do %>
+              Sign out
+            <% end %>
+          </div>
+        </div>
       <% else %>
-        <%= link_to "Sign In", sign_in_path, 
+        <%= link_to "Sign In", sign_in_path,
             class: "text-sm font-semibold leading-6 text-gray-900 hover:text-gray-600" %>
       <% end %>
     </div>
