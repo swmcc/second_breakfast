@@ -1,0 +1,20 @@
+{
+  "name": "second-breakfast-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Second Breakfast recipe management",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "second-breakfast-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": ["mcp", "recipes", "claude"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.4.3"
+  }
+}
