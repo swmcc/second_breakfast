@@ -1,0 +1,155 @@
+# Second Breakfast MCP Server
+
+An MCP (Model Context Protocol) server that enables Claude to manage recipes in Second Breakfast. Combined with Claude's vision capabilities, this allows rapid recipe import from photos of recipe books.
+
+## Installation
+
+```bash
+cd mcp-server
+npm install
+```
+
+## Configuration
+
+The server requires two environment variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `API_URL` | Second Breakfast API base URL | `http://localhost:3000/api/v1` |
+| `API_TOKEN` | Your API authentication token | (required for write operations) |
+
+### Getting an API Token
+
+```ruby
+# In Rails console (bin/rails console)
+user = User.find_by(email: "your@email.com")
+user.generate_api_token!
+# => "abc123..." (copy this token)
+```
+
+## Usage with Claude Desktop
+
+Add to your `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "second-breakfast": {
+      "command": "node",
+      "args": ["/path/to/second_breakfast/mcp-server/index.js"],
+      "env": {
+        "API_URL": "http://localhost:3000/api/v1",
+        "API_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
+
+## Usage with Claude Code
+
+Add to your project's `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "second-breakfast": {
+      "command": "node",
+      "args": ["./mcp-server/index.js"],
+      "env": {
+        "API_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
+
+## Available Tools
+
+### `list_categories`
+
+List all available recipe categories.
+
+**Example prompt:** "What categories are available for recipes?"
+
+### `search_recipes`
+
+Search for existing recipes by title or description.
+
+**Parameters:**
+- `query` (string) - Search term
+
+**Example prompt:** "Search for chocolate cake recipes"
+
+### `get_recipe`
+
+Get full details of a recipe by ID.
+
+**Parameters:**
+- `id` (number) - Recipe ID
+
+**Example prompt:** "Show me recipe #42"
+
+### `create_recipe`
+
+Create a new recipe with all fields.
+
+**Parameters:**
+- `title` (string) - Recipe title
+- `description` (string) - Brief description
+- `serves` (number) - Number of servings
+- `prep_time` (string) - e.g., "30 minutes"
+- `category_id` (number) - Category ID
+- `instructions` (string) - Cooking instructions
+- `ingredients` (array) - List of {name, quantity, unit}
+- `nutrition` (object) - {calories, protein, fat, carbs, fibre, sugar, sodium}
+
+## Example Workflows
+
+### Import Recipe from Photo
+
+1. Take a photo of a recipe page
+2. Send to Claude: "Create a recipe from this photo"
+3. Claude extracts the data and calls `create_recipe`
+
+**Example prompt:**
+```
+Here's a photo of my grandmother's apple pie recipe.
+Please extract all the details and create it in Second Breakfast.
+```
+
+### Batch Import
+
+```
+I'm going to show you 5 recipe photos from my cookbook.
+For each one, please:
+1. Extract the recipe details
+2. Check if we already have it (search_recipes)
+3. If not, create it (create_recipe)
+```
+
+### Check Before Import
+
+```
+I want to add this chocolate cake recipe. First check if we
+already have a similar one, and only create it if we don't.
+```
+
+## Troubleshooting
+
+### "Unauthorized" error
+
+- Check that `API_TOKEN` is set correctly
+- Verify the token is valid: `User.find_by(api_token: "your-token")`
+
+### Server not connecting
+
+- Ensure the Second Breakfast Rails server is running (`bin/dev`)
+- Check the `API_URL` is correct
+- Verify the MCP server path in your config
+
+### Recipe creation fails
+
+- Check all required fields are provided
+- Verify the `category_id` exists (use `list_categories`)
+- Check the Rails logs for validation errors
