@@ -62,31 +62,31 @@
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div class="bg-gray-50 rounded-lg p-4">
           <span class="block text-gray-500 text-base">Calories</span>
-          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["calories"] %> kcal</span>
+          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["calories"].to_s.gsub(/\s*(kcal|cal)?\s*$/i, '') %> kcal</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
           <span class="block text-gray-500 text-base">Protein</span>
-          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["protein"] %>g</span>
+          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["protein"].to_s.gsub(/\s*g?\s*$/i, '') %>g</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
           <span class="block text-gray-500 text-base">Fat</span>
-          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["fat"] %>g</span>
+          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["fat"].to_s.gsub(/\s*g?\s*$/i, '') %>g</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
           <span class="block text-gray-500 text-base">Carbs</span>
-          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["carbs"] %>g</span>
+          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["carbs"].to_s.gsub(/\s*g?\s*$/i, '') %>g</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
           <span class="block text-gray-500 text-base">Fiber</span>
-          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["fibre"] %>g</span>
+          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["fibre"].to_s.gsub(/\s*g?\s*$/i, '') %>g</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
           <span class="block text-gray-500 text-base">Sugar</span>
-          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["sugar"] %>g</span>
+          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["sugar"].to_s.gsub(/\s*g?\s*$/i, '') %>g</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
           <span class="block text-gray-500 text-base">Sodium</span>
-          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["sodium"] %>mg</span>
+          <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["sodium"].to_s.gsub(/\s*mg?\s*$/i, '') %>mg</span>
         </div>
       </div>
     </div>
