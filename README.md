@@ -1,5 +1,9 @@
 # Second Breakfast
 
+<p align="center">
+  <img src="docs/images/banner.svg" alt="Second Breakfast - Recipe Discovery & Meal Planning" width="600"/>
+</p>
+
 A recipe discovery and meal planning application built with Ruby on Rails. Browse recipes, add them to your basket, and generate aggregated shopping lists for your chosen meals.
 
 ## Features

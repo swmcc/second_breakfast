@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fef3c7"/>
+      <stop offset="50%" style="stop-color:#fde68a"/>
+      <stop offset="100%" style="stop-color:#fcd34d"/>
+    </linearGradient>
+    <linearGradient id="text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#92400e"/>
+      <stop offset="100%" style="stop-color:#78350f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="200" fill="url(#bg)" rx="12"/>
+
+  <!-- Decorative bread/food icons -->
+  <g fill="#d97706" opacity="0.3">
+    <!-- Left side croissant shape -->
+    <ellipse cx="80" cy="100" rx="40" ry="25" transform="rotate(-20 80 100)"/>
+    <ellipse cx="95" cy="85" rx="30" ry="18" transform="rotate(-40 95 85)"/>
+
+    <!-- Right side egg shape -->
+    <ellipse cx="720" cy="100" rx="35" ry="28"/>
+    <circle cx="720" cy="95" r="15" fill="#fef3c7"/>
+  </g>
+
+  <!-- Main title -->
+  <text x="400" y="95" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="url(#text-gradient)" text-anchor="middle">
+    Second Breakfast
+  </text>
+
+  <!-- Subtitle -->
+  <text x="400" y="135" font-family="system-ui, sans-serif" font-size="18" fill="#92400e" text-anchor="middle" opacity="0.8">
+    Recipe Discovery &amp; Meal Planning
+  </text>
+
+  <!-- Decorative line -->
+  <line x1="250" y1="155" x2="550" y2="155" stroke="#d97706" stroke-width="2" opacity="0.4"/>
+
+  <!-- Small icons -->
+  <g fill="#b45309" opacity="0.6">
+    <circle cx="270" cy="155" r="4"/>
+    <circle cx="530" cy="155" r="4"/>
+  </g>
+</svg>
