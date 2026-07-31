@@ -89,36 +89,39 @@
     <%= form.text_field :prep_time, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
   </div>
 
+  <%# Helper to extract numeric value from nutrition fields (handles "7g", "200mg", etc.) %>
+  <% extract_number = ->(val) { val.to_s.gsub(/[^\d.]/, '').presence } %>
+
   <div class="my-5">
   <%= form.label :nutrition, "Nutrition Details" %>
   <div id="nutrition-fields" class="mt-2 grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
     <div>
       <%= form.label :nutrition_calories, "Calories (kcal)" %>
-      <%= form.number_field :nutrition_calories, step: 1, value: recipe.nutrition&.dig("calories"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+      <%= form.number_field :nutrition_calories, step: 1, value: extract_number.call(recipe.nutrition&.dig("calories")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
       <%= form.label :nutrition_protein, "Protein (g)" %>
-      <%= form.number_field :nutrition_protein, step: 0.1, value: recipe.nutrition&.dig("protein"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+      <%= form.number_field :nutrition_protein, step: 0.1, value: extract_number.call(recipe.nutrition&.dig("protein")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
       <%= form.label :nutrition_fat, "Fat (g)" %>
-      <%= form.number_field :nutrition_fat, step: 0.1, value: recipe.nutrition&.dig("fat"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+      <%= form.number_field :nutrition_fat, step: 0.1, value: extract_number.call(recipe.nutrition&.dig("fat")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
       <%= form.label :nutrition_carbs, "Carbohydrates (g)" %>
-      <%= form.number_field :nutrition_carbs, step: 0.1, value: recipe.nutrition&.dig("carbs"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+      <%= form.number_field :nutrition_carbs, step: 0.1, value: extract_number.call(recipe.nutrition&.dig("carbs")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
       <%= form.label :nutrition_fibre, "Fibre (g)" %>
-      <%= form.number_field :nutrition_fibre, step: 0.1, value: recipe.nutrition&.dig("fibre"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+      <%= form.number_field :nutrition_fibre, step: 0.1, value: extract_number.call(recipe.nutrition&.dig("fibre")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
       <%= form.label :nutrition_sugar, "Sugar (g)" %>
-      <%= form.number_field :nutrition_sugar, step: 0.1, value: recipe.nutrition&.dig("sugar"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+      <%= form.number_field :nutrition_sugar, step: 0.1, value: extract_number.call(recipe.nutrition&.dig("sugar")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
       <%= form.label :nutrition_sodium, "Sodium (mg)" %>
-      <%= form.number_field :nutrition_sodium, step: 1, value: recipe.nutrition&.dig("sodium"), class: "shadow rounded-md border px-3 py-2 w-full" %>
+      <%= form.number_field :nutrition_sodium, step: 1, value: extract_number.call(recipe.nutrition&.dig("sodium")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
   </div>
 </div>
