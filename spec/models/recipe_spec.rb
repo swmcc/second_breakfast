@@ -27,6 +27,44 @@ RSpec.describe Recipe do
         expect(recipe).to be_valid
       end
     end
+
+    describe "image validation" do
+      it "accepts supported image content types up to 5 MB" do
+        recipe = build(:recipe)
+        recipe.image.attach(io: StringIO.new("image data"), filename: "image.webp", content_type: "image/webp")
+
+        expect(recipe).to be_valid
+      end
+
+      it "rejects unsupported image content types" do
+        recipe = build(:recipe)
+        recipe.image.attach(io: StringIO.new("document"), filename: "document.pdf", content_type: "application/pdf")
+
+        expect(recipe).not_to be_valid
+        expect(recipe.errors[:image]).to include("must be a PNG, JPEG, WebP, or GIF")
+      end
+
+      it "rejects images larger than 5 MB" do
+        blob = ActiveStorage::Blob.create_and_upload!(
+          io: StringIO.new("a" * (5.megabytes + 1)),
+          filename: "large.jpg",
+          content_type: "image/jpeg"
+        )
+        recipe = build(:recipe)
+        recipe.image.attach(blob)
+
+        expect(recipe).not_to be_valid
+        expect(recipe.errors[:image]).to include("must be smaller than 5 MB")
+      end
+    end
+  end
+
+  describe "instruction sanitization" do
+    it "removes executable script tags when rendered" do
+      recipe = build(:recipe, instructions: "Prepare safely<script>alert(1)</script>")
+
+      expect(recipe.instructions.to_s).not_to include("<script")
+    end
   end
 
   describe "associations" do
