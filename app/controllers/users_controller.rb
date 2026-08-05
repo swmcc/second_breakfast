@@ -17,7 +17,7 @@ class UsersController < ApplicationController
       end
     }
 
-    send_data JSON.pretty_generate(account_data),
+    send_data JSON.pretty_generate(account_data.as_json),
               filename: "second-breakfast-account-data.json",
               type: "application/json",
               disposition: "attachment"
