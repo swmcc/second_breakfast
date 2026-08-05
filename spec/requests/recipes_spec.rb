@@ -261,5 +261,14 @@ RSpec.describe "Recipes" do
         expect(response).to have_http_status(:ok)
       end
     end
+
+    it "treats SQL metacharacters as literal search text" do
+      expect {
+        get search_recipes_path, params: { query: "%' OR '1'='1" }
+      }.not_to raise_error
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).not_to include("Fluffy Pancakes", "Cheese Omelette")
+    end
   end
 end

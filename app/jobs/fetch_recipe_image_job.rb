@@ -3,6 +3,8 @@
 class FetchRecipeImageJob < ApplicationJob
   queue_as :default
 
+  ALLOWED_CONTENT_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
+
   def perform(recipe_id, search_query = nil)
     recipe = Recipe.find_by(id: recipe_id)
     return unless recipe
@@ -46,9 +48,15 @@ class FetchRecipeImageJob < ApplicationJob
     return nil unless image_response
     return nil if image_response.body.bytesize > 2_000_000
 
+    content_type = image_response["Content-Type"].to_s.split(";", 2).first.to_s.strip.downcase
+    unless content_type.start_with?("image/") && content_type.in?(ALLOWED_CONTENT_TYPES)
+      Rails.logger.warn("FetchRecipeImageJob skipped unsupported image Content-Type: #{content_type.presence || 'missing'}")
+      return nil
+    end
+
     {
       data: image_response.body,
-      content_type: image_response.content_type || "image/jpeg"
+      content_type: content_type
     }
   rescue StandardError => e
     Rails.logger.error("FetchRecipeImageJob error: #{e.message}")

@@ -126,6 +126,15 @@ RSpec.describe "Api::V1::Recipes", type: :request do
 
         run_test!
       end
+
+      response "200", "SQL metacharacters are treated literally" do
+        let(:query) { "%' OR '1'='1" }
+        before { create(:recipe, title: "Should Not Match") }
+
+        run_test! do |response|
+          expect(response.parsed_body.fetch("recipes")).to be_empty
+        end
+      end
     end
   end
 
