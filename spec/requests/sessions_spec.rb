@@ -54,6 +54,67 @@ RSpec.describe "Sessions" do
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
+
+    describe "session fixation" do
+      it "issues a new session id when logging in" do
+        # Touching a protected page as a guest establishes a session (flash alert).
+        get new_recipe_path
+        session_id_before = session.id.to_s
+        cookie_before = cookies["_second_breakfast_session"]
+
+        post session_path, params: { email: user.email, password: "password123" }
+
+        expect(session[:user_id]).to eq(user.id)
+        expect(session.id.to_s).not_to eq(session_id_before)
+        expect(cookies["_second_breakfast_session"]).not_to eq(cookie_before)
+      end
+    end
+
+    describe "rate limiting" do
+      include ActiveSupport::Testing::TimeHelpers
+
+      # The test env uses :null_store, whose #increment always returns nil, so the
+      # rate limiter never trips. The limiter captures ActionController::Base.cache_store
+      # at class-load time, so swap that object's counter for a real one here.
+      let(:rate_limit_store) { ActiveSupport::Cache::MemoryStore.new }
+
+      before do
+        allow(ActionController::Base.cache_store).to receive(:increment) do |key, amount = 1, **options|
+          rate_limit_store.increment(key, amount, **options)
+        end
+      end
+
+      it "blocks further attempts once the limit is exceeded" do
+        10.times do
+          post session_path, params: { email: user.email, password: "wrongpassword" }
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        post session_path, params: { email: user.email, password: "wrongpassword" }
+
+        expect(response).to redirect_to(sign_in_path)
+        expect(flash[:alert]).to eq("Too many login attempts. Please try again later.")
+      end
+
+      it "blocks valid credentials too once the limit is exceeded" do
+        10.times { post session_path, params: { email: user.email, password: "wrongpassword" } }
+
+        post session_path, params: { email: user.email, password: "password123" }
+
+        expect(response).to redirect_to(sign_in_path)
+        expect(flash[:alert]).to eq("Too many login attempts. Please try again later.")
+      end
+
+      it "allows attempts again once the window has passed" do
+        11.times { post session_path, params: { email: user.email, password: "wrongpassword" } }
+
+        travel_to 4.minutes.from_now do
+          post session_path, params: { email: user.email, password: "password123" }
+
+          expect(response).to redirect_to(root_path)
+        end
+      end
+    end
   end
 
   describe "DELETE /sign_out" do
