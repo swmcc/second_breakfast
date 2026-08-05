@@ -11,6 +11,7 @@ class Recipe < ApplicationRecord
   validates :title, :description, :serves, :instructions, :prep_time, :ingredients, :nutrition, presence: true
 
   validate :validate_nutrition_format
+  validate :acceptable_image
 
   private
 
@@ -19,5 +20,13 @@ class Recipe < ApplicationRecord
     unless nutrition.is_a?(Hash) && (expected_keys - nutrition.keys).empty?
       errors.add(:nutrition, "must include all required fields: #{expected_keys.join(', ')}")
     end
+  end
+
+  def acceptable_image
+    return unless image.attached?
+
+    allowed_content_types = %w[image/png image/jpeg image/webp image/gif]
+    errors.add(:image, "must be a PNG, JPEG, WebP, or GIF") unless image.blob.content_type.in?(allowed_content_types)
+    errors.add(:image, "must be smaller than 5 MB") if image.blob.byte_size > 5.megabytes
   end
 end
