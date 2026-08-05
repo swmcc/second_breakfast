@@ -21,6 +21,12 @@ Rails.application.routes.draw do
   get "sign_in", to: "sessions#new"
   delete "sign_out", to: "sessions#destroy", as: :sign_out
 
+  get "privacy", to: "pages#privacy"
+  get "terms", to: "pages#terms"
+  get "account", to: "users#show", as: :account
+  get "account/export", to: "users#export", as: :account_export
+  delete "account", to: "users#destroy"
+
   get "pages/random_recipe"
   resources :recipes do
     collection do
