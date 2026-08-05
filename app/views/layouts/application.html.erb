@@ -87,6 +87,9 @@
               Signed in as<br>
               <span class="font-medium text-gray-900"><%= current_user.email %></span>
             </div>
+            <%= link_to "Account", account_path,
+                class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100",
+                role: "menuitem" %>
             <%= link_to sign_out_path,
                 class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100",
                 data: { turbo_method: :delete },
@@ -154,12 +157,13 @@
     </main>
 
 <footer class="bg-white">
-    <div class="mt-8 border-t border-gray-900/10 pt-8 md:flex md:items-center md:justify-between">
+    <div class="mx-auto mt-8 max-w-7xl border-t border-gray-900/10 px-6 py-8 md:flex md:items-center md:justify-between lg:px-8">
       <div class="flex gap-x-6 md:order-2">
+        <%= link_to "Privacy", privacy_path, class: "text-sm/6 text-gray-600 hover:text-gray-900" %>
+        <%= link_to "Terms", terms_path, class: "text-sm/6 text-gray-600 hover:text-gray-900" %>
       </div>
-      <p class="mt-8 text-sm/6 text-gray-600 md:order-1 md:mt-0">&copy; 2025 swm.cc, Made with ❤️ in NI.</p>
+      <p class="mt-8 text-sm/6 text-gray-600 md:order-1 md:mt-0">&copy; <%= Date.current.year %> swm.cc, Made with ❤️ in NI.</p>
     </div>
-  </div>
 </footer>
 
   </body>

@@ -1,6 +1,22 @@
 require "rails_helper"
 
 RSpec.describe "Pages" do
+  describe "public compliance pages" do
+    it "renders the privacy policy while signed out" do
+      get privacy_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Privacy Policy")
+    end
+
+    it "renders the terms while signed out" do
+      get terms_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Terms of Use")
+    end
+  end
+
   describe "GET / (root)" do
     context "when recipes exist" do
       let!(:recipes) { create_list(:recipe, 5) }
