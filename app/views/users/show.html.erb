@@ -1,0 +1,26 @@
+<% content_for :title, "Account | Second Breakfast" %>
+
+<section class="mx-auto w-full max-w-2xl">
+  <h1 class="text-3xl font-bold tracking-tight text-gray-900">Account</h1>
+  <p class="mt-2 text-gray-600">Manage a copy of your data or permanently remove your account.</p>
+
+  <div class="mt-8 divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
+    <div class="p-6">
+      <h2 class="font-semibold text-gray-900">Export my data</h2>
+      <p class="mt-1 text-sm text-gray-600">Download your account details and saved basket recipes as JSON.</p>
+      <%= link_to "Export my data", account_export_path,
+          class: "mt-4 inline-flex rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    </div>
+
+    <div class="p-6">
+      <h2 class="font-semibold text-gray-900">Delete account</h2>
+      <p class="mt-1 text-sm text-gray-600">Permanently delete your account and all saved basket selections. This cannot be undone.</p>
+      <%= link_to "Delete account", account_path,
+          class: "mt-4 inline-flex rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500",
+          data: {
+            turbo_method: :delete,
+            turbo_confirm: "Are you sure? This permanently deletes your account."
+          } %>
+    </div>
+  </div>
+</section>
