@@ -2,7 +2,10 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins "*"
+    # Defaults to permissive for local development; set CORS_ALLOWED_ORIGINS to a
+    # comma-separated list of origins in production to lock this down. The bundled
+    # mcp-server calls the API server-side and does not need CORS.
+    origins ENV.fetch("CORS_ALLOWED_ORIGINS", "*").split(",").map(&:strip)
 
     resource "/api/*",
       headers: :any,
