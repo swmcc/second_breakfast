@@ -7,16 +7,21 @@ import { z } from "zod";
 const API_URL = process.env.API_URL || "http://localhost:3000/api/v1";
 const API_TOKEN = process.env.API_TOKEN || "";
 
+if (!API_TOKEN) {
+  console.error(
+    "API_TOKEN is required — every API operation needs it. " +
+    "Create an API key in Second Breakfast under Account -> API Keys (/account)."
+  );
+  process.exit(1);
+}
+
 async function apiRequest(method, path, body = null) {
   const url = `${API_URL}${path}`;
   const headers = {
     "Content-Type": "application/json",
     "Accept": "application/json",
+    "Authorization": `Bearer ${API_TOKEN}`,
   };
-
-  if (API_TOKEN) {
-    headers["Authorization"] = `Bearer ${API_TOKEN}`;
-  }
 
   const options = { method, headers };
   if (body) {
@@ -25,6 +30,12 @@ async function apiRequest(method, path, body = null) {
 
   const response = await fetch(url, options);
   const data = await response.json();
+
+  if (response.status === 401) {
+    throw new Error(
+      "API key invalid or revoked — create a new one in Second Breakfast under Account -> API Keys (/account)."
+    );
+  }
 
   if (!response.ok) {
     throw new Error(data.error || data.errors?.join(", ") || "API request failed");

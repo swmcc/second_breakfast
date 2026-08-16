@@ -110,7 +110,7 @@ Create recipes programmatically via the API. Requires authentication.
 
 ```bash
 curl -X POST http://localhost:3000/api/v1/recipes \
-  -H "Authorization: Bearer your-token" \
+  -H "Authorization: Bearer sb_your_api_key" \
   -H "Content-Type: application/json" \
   -d '{
     "recipe": {
@@ -155,31 +155,30 @@ Interactive API documentation available at [/api-docs](/api-docs) (Swagger UI).
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/api/v1/recipes` | No | List recipes (paginated) |
-| GET | `/api/v1/recipes/:id` | No | Show recipe |
-| GET | `/api/v1/recipes/search?query=` | No | Search recipes |
+| GET | `/api/v1/recipes` | Yes | List recipes (paginated) |
+| GET | `/api/v1/recipes/:id` | Yes | Show recipe |
+| GET | `/api/v1/recipes/search?query=` | Yes | Search recipes |
 | POST | `/api/v1/recipes` | Yes | Create recipe |
 | PUT | `/api/v1/recipes/:id` | Yes | Update recipe |
 | DELETE | `/api/v1/recipes/:id` | Yes | Delete recipe |
-| GET | `/api/v1/categories` | No | List categories |
-| GET | `/api/v1/categories/:id` | No | Category with recipes |
+| GET | `/api/v1/categories` | Yes | List categories |
+| GET | `/api/v1/categories/:id` | Yes | Category with recipes |
 | GET | `/api/v1/baskets` | Yes | User's basket |
 | POST | `/api/v1/baskets` | Yes | Add recipe to basket |
 | DELETE | `/api/v1/baskets/:id` | Yes | Remove from basket |
 
 ### Authentication
 
-Authenticated endpoints require a Bearer token in the Authorization header:
+**Every** endpoint requires an API key sent as a Bearer token:
 
 ```
-Authorization: Bearer your_api_token
+Authorization: Bearer sb_your_api_key
 ```
 
-Generate an API token via the Rails console:
-```ruby
-user = User.find_by(email: "your@email.com")
-user.generate_api_token!
-```
+Create a key from the **Account** page (`/account`, API Keys section): name it,
+click **Create key**, and copy the `sb_...` token — it is shown exactly once and
+cannot be retrieved again. Revoke keys from the same page; revocation takes
+effect immediately.
 
 ## MCP Server (Claude Integration)
 
