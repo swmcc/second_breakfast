@@ -2,7 +2,7 @@
 
 class MealPlansController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_meal_plan, only: [ :show, :destroy, :accept, :reopen ]
+  before_action :set_meal_plan, only: [ :show, :destroy, :accept, :reopen, :auto_fill ]
 
   def index
     @current_plan = current_user.meal_plans.find_by(week_start_date: MealPlan.normalize_week_start(Date.current))
@@ -23,7 +23,12 @@ class MealPlansController < ApplicationController
     meal_plan = current_user.meal_plans.new(week_start_date: week_start)
 
     if meal_plan.save
-      redirect_to meal_plan, notice: "Meal plan created — start adding meals!"
+      if params.dig(:meal_plan, :auto_fill) != "0"
+        meal_plan.auto_fill!
+        redirect_to meal_plan, notice: "Meal plan created with a week of meals picked for you — swap anything you fancy"
+      else
+        redirect_to meal_plan, notice: "Meal plan created — start adding meals!"
+      end
     elsif (existing = current_user.meal_plans.find_by(week_start_date: MealPlan.normalize_week_start(week_start)))
       redirect_to existing, notice: "You already have a plan for that week"
     else
@@ -53,6 +58,14 @@ class MealPlansController < ApplicationController
       redirect_to @meal_plan, notice: "Plan reopened for editing"
     else
       redirect_to @meal_plan, alert: "This plan cannot be reopened"
+    end
+  end
+
+  def auto_fill
+    if @meal_plan.auto_fill!
+      redirect_to @meal_plan, notice: "Week filled with a breakfast, lunch and dinner per day"
+    else
+      redirect_to @meal_plan, alert: "This plan cannot be auto-filled"
     end
   end
 

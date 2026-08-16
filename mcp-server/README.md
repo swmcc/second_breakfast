@@ -115,13 +115,16 @@ Weekly meal plans run Monday–Sunday, one plan per week. Draft plans are editab
 
 - `list_meal_plans` — list plans, newest first (`filter`: `active` / `archived`)
 - `get_meal_plan` — a plan's full Monday–Sunday grid (`id`)
-- `create_meal_plan` — plan a week (`week_start_date` optional; defaults to the current week, any date normalises to Monday; past weeks rejected)
+- `create_meal_plan` — plan a week (`week_start_date` optional; defaults to the current week, any date normalises to Monday; past weeks rejected). Pass `auto_fill: true` to have the week filled automatically with one breakfast, one lunch and one dinner per day, picked from the user's recipes by category
 - `add_meal_to_plan` — add a recipe to a day (`plan_id`, `recipe_id`, `day`)
 - `remove_meal_from_plan` — remove an entry (`plan_id`, `entry_id`)
 - `accept_meal_plan` / `reopen_meal_plan` — lock / unlock a plan (`id`)
 - `get_meal_plan_shopping_list` — aggregated ingredients for the week (`id`)
 
-**Example prompt:**
+**Example prompts:**
+```
+Plan next week for me automatically — just fill every day.
+```
 ```
 Plan next week for me: use my existing recipes, fish twice,
 no beef, and keep breakfasts quick. Then show me the shopping list.

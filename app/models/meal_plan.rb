@@ -1,6 +1,13 @@
 # frozen_string_literal: true
 
 class MealPlan < ApplicationRecord
+  # Slot order also drives display ordering within a day.
+  MEAL_SLOTS = {
+    "breakfast" => [ "Breakfast" ],
+    "lunch" => [ "Lunch" ],
+    "dinner" => [ "Dinner", "Main Course" ]
+  }.freeze
+
   belongs_to :user
   has_many :meal_plan_entries, dependent: :destroy
   has_many :recipes, through: :meal_plan_entries
@@ -52,6 +59,27 @@ class MealPlan < ApplicationRecord
     return false unless accepted? && !archived?
 
     update!(status: :draft)
+    true
+  end
+
+  # Fills the week with one breakfast, one lunch and one dinner per day,
+  # drawn from recipes whose category matches each slot. Recipes are spread
+  # across the week (no repeats until a slot's pool is exhausted); slots with
+  # no matching recipes are skipped. Existing entries are left untouched —
+  # a clash with one is simply skipped.
+  def auto_fill!
+    return false unless editable?
+
+    transaction do
+      MEAL_SLOTS.each_value do |category_names|
+        pool = Recipe.joins(:category).where(categories: { name: category_names }).to_a.shuffle
+        next if pool.empty?
+
+        7.times do |day|
+          meal_plan_entries.create(recipe: pool[day % pool.size], day_of_week: day)
+        end
+      end
+    end
     true
   end
 

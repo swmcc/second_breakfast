@@ -53,6 +53,7 @@ Rails.application.routes.draw do
     member do
       post :accept
       post :reopen
+      post :auto_fill
     end
     resources :entries, controller: "meal_plan_entries", only: [ :create, :destroy ]
   end

@@ -139,6 +139,58 @@ RSpec.describe MealPlan, type: :model do
     end
   end
 
+  describe "#auto_fill!" do
+    let!(:breakfast) { create(:category, name: "Breakfast") }
+    let!(:dinner) { create(:category, name: "Dinner") }
+    let(:plan) { create(:meal_plan, user: user) }
+
+    before do
+      create_list(:recipe, 2, category: breakfast)
+      create_list(:recipe, 3, category: dinner)
+    end
+
+    it "adds one recipe per matching slot per day, skipping empty slots" do
+      expect(plan.auto_fill!).to be(true)
+
+      # breakfast + dinner have recipes, lunch has none: 2 slots x 7 days
+      expect(plan.meal_plan_entries.count).to eq(14)
+      (0..6).each do |day|
+        day_categories = plan.meal_plan_entries.where(day_of_week: day).map { |e| e.recipe.category.name }
+        expect(day_categories).to contain_exactly("Breakfast", "Dinner")
+      end
+    end
+
+    it "treats Main Course recipes as dinners" do
+      Category.find_by(name: "Dinner").update!(name: "Main Course")
+
+      plan.auto_fill!
+
+      expect(plan.recipes.joins(:category).where(categories: { name: "Main Course" }).count).to be_positive
+    end
+
+    it "spreads recipes rather than repeating one" do
+      plan.auto_fill!
+
+      dinner_recipe_ids = plan.meal_plan_entries.joins(recipe: :category)
+                              .where(categories: { name: "Dinner" }).pluck(:recipe_id)
+      expect(dinner_recipe_ids.uniq.size).to eq(3)
+    end
+
+    it "skips entries that clash with existing ones and keeps them" do
+      existing = create(:meal_plan_entry, meal_plan: plan, recipe: Recipe.first, day_of_week: 0)
+
+      expect(plan.auto_fill!).to be(true)
+      expect(MealPlanEntry.exists?(existing.id)).to be(true)
+    end
+
+    it "refuses on a locked plan" do
+      plan.accept!
+
+      expect(plan.auto_fill!).to be(false)
+      expect(plan.meal_plan_entries.count).to eq(0)
+    end
+  end
+
   describe "#aggregated_ingredients" do
     it "counts a recipe once per planned day" do
       recipe = create(:recipe, ingredients: [ { "name" => "onion", "quantity" => "1", "unit" => "whole" } ])
