@@ -55,6 +55,7 @@ module Api
             category: recipe.category&.name,
             serves: recipe.serves,
             prep_time: recipe.prep_time,
+            url: recipe_url(recipe),
             image_url: recipe.image.attached? ? url_for(recipe.image) : nil
           }
         end

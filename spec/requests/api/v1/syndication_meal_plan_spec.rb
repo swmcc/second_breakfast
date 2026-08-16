@@ -36,6 +36,7 @@ RSpec.describe "Api::V1::Syndication::MealPlans", type: :request do
                                category: { type: :string, nullable: true },
                                serves: { type: :integer, nullable: true },
                                prep_time: { type: :string, nullable: true },
+                               url: { type: :string },
                                image_url: { type: :string, nullable: true }
                              }
                            }
