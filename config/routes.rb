@@ -20,6 +20,11 @@ Rails.application.routes.draw do
         end
         resources :entries, controller: "meal_plan_entries", only: [ :create, :destroy ]
       end
+
+      # Public, unauthenticated — see Api::V1::Syndication::MealPlansController
+      namespace :syndication do
+        resource :meal_plan, only: [ :show ], controller: "meal_plans"
+      end
     end
   end
 
