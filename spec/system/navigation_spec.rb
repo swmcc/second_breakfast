@@ -7,10 +7,11 @@ RSpec.describe "Navigation", type: :system do
     context "when signed in" do
       before { sign_in_as(user) }
 
-      it "displays the meal plan link in the main nav" do
+      it "displays the meal plan and saved recipes links in the main nav" do
         visit root_path
-        expect(page).to have_link(href: meal_plan_path)
-        expect(page).to have_content("0 Meals")
+        expect(page).to have_link(href: meal_plans_path)
+        expect(page).to have_link(href: meals_path)
+        expect(page).to have_content("0 Saved Recipes")
       end
 
       it "displays the user email as a dropdown trigger" do
@@ -67,15 +68,15 @@ RSpec.describe "Navigation", type: :system do
       create(:basket, user: user, recipe: recipe)
 
       visit root_path
-      expect(page).to have_content("1 Meal")
+      expect(page).to have_content("1 Saved Recipe")
     end
 
-    it "shows plural for multiple meals" do
+    it "shows plural for multiple saved recipes" do
       recipes = create_list(:recipe, 3)
       recipes.each { |r| create(:basket, user: user, recipe: r) }
 
       visit root_path
-      expect(page).to have_content("3 Meals")
+      expect(page).to have_content("3 Saved Recipes")
     end
   end
 end

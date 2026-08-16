@@ -11,7 +11,7 @@ RSpec.describe "Baskets", type: :system do
       visit recipes_path
 
       # User starts with 0 meals
-      expect(page).to have_content("0 Meals")
+      expect(page).to have_content("0 Saved Recipes")
     end
 
     it "updates basket count when adding a recipe" do
@@ -20,7 +20,7 @@ RSpec.describe "Baskets", type: :system do
 
       visit recipes_path
 
-      expect(page).to have_content("1 Meal")
+      expect(page).to have_content("1 Saved Recipe")
     end
 
     it "shows multiple meals when basket has multiple recipes" do
@@ -29,7 +29,7 @@ RSpec.describe "Baskets", type: :system do
 
       visit recipes_path
 
-      expect(page).to have_content("3 Meals")
+      expect(page).to have_content("3 Saved Recipes")
     end
   end
 

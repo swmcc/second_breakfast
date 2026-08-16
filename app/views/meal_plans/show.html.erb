@@ -1,0 +1,62 @@
+<% content_for :title, "Meal Plan #{@meal_plan.week_start_date.strftime('%-d %b')} | Second Breakfast" %>
+
+<section class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8" data-controller="meal-picker">
+  <%= render "flash" %>
+
+  <% if @meal_plan.archived? %>
+    <div class="mb-6 rounded-md bg-gray-50 px-4 py-3 text-sm text-gray-600 ring-1 ring-inset ring-gray-200">
+      This week is archived &mdash; it's read-only history now.
+    </div>
+  <% end %>
+
+  <div class="md:flex md:items-center md:justify-between">
+    <div>
+      <div class="flex items-center gap-x-3">
+        <%= link_to meal_plans_path, class: "text-gray-400 hover:text-gray-600", title: "All meal plans" do %>
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          <span class="sr-only">Back to meal plans</span>
+        <% end %>
+        <h1 class="text-2xl font-bold tracking-tight text-gray-900">
+          <%= @meal_plan.current_week? ? "This week" : @meal_plan.week_start_date.strftime("Week of %-d %B") %>
+        </h1>
+        <%= render "status_pill", meal_plan: @meal_plan %>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">
+        <%= @meal_plan.week_start_date.strftime("Monday %-d %b") %> &ndash; <%= @meal_plan.week_end_date.strftime("Sunday %-d %b %Y") %>
+      </p>
+    </div>
+
+    <div class="mt-4 flex items-center gap-x-2 md:mt-0 print:hidden">
+      <button data-controller="print" data-action="print#print"
+              class="inline-flex items-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+        Print
+      </button>
+      <% if @meal_plan.editable? %>
+        <%= button_to "Delete", meal_plan_path(@meal_plan), method: :delete,
+            class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-red-50",
+            form: { data: { turbo_confirm: "Delete this meal plan?" } } %>
+        <%= button_to "Accept plan", accept_meal_plan_path(@meal_plan), method: :post,
+            class: "rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500",
+            form: { data: { turbo_confirm: "Accepting locks the plan. You can reopen it until the week ends." } } %>
+      <% elsif @meal_plan.accepted? && !@meal_plan.archived? %>
+        <%= button_to "Reopen", reopen_meal_plan_path(@meal_plan), method: :post,
+            class: "rounded-md bg-white px-3.5 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- The board -->
+  <div class="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+    <% MealPlanEntry::DAYS.each_index do |day_index| %>
+      <%= render "day_cell", meal_plan: @meal_plan, day_index: day_index, entries: @entries_by_day[day_index] || [] %>
+    <% end %>
+  </div>
+
+  <%= render "shopping_list", meal_plan: @meal_plan %>
+
+  <% if @meal_plan.editable? %>
+    <%= render "picker" %>
+  <% end %>
+</section>
