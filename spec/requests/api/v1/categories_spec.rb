@@ -3,10 +3,14 @@
 require "swagger_helper"
 
 RSpec.describe "Api::V1::Categories", type: :request do
+  let(:api_key) { create(:api_key) }
+  let(:Authorization) { "Bearer #{api_key.token}" }
+
   path "/api/v1/categories" do
     get "List categories" do
       tags "Categories"
       produces "application/json"
+      security [ bearer_auth: [] ]
 
       response "200", "categories found" do
         schema type: :object,
@@ -21,6 +25,14 @@ RSpec.describe "Api::V1::Categories", type: :request do
 
         run_test!
       end
+
+      response "401", "unauthorized" do
+        schema "$ref" => "#/components/schemas/Error"
+
+        let(:Authorization) { "Bearer invalid" }
+
+        run_test!
+      end
     end
   end
 
@@ -30,6 +42,7 @@ RSpec.describe "Api::V1::Categories", type: :request do
     get "Show a category with recipes" do
       tags "Categories"
       produces "application/json"
+      security [ bearer_auth: [] ]
       parameter name: :page, in: :query, type: :integer, required: false
 
       response "200", "category found" do
@@ -53,6 +66,15 @@ RSpec.describe "Api::V1::Categories", type: :request do
         schema "$ref" => "#/components/schemas/Error"
 
         let(:id) { 0 }
+
+        run_test!
+      end
+
+      response "401", "unauthorized" do
+        schema "$ref" => "#/components/schemas/Error"
+
+        let(:Authorization) { "Bearer invalid" }
+        let(:id) { create(:category).id }
 
         run_test!
       end

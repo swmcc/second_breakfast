@@ -3,13 +3,9 @@ class User < ApplicationRecord
 
   has_many :baskets, dependent: :destroy
   has_many :recipes, through: :baskets
+  has_many :api_keys, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true
-
-  def generate_api_token!
-    update!(api_token: SecureRandom.hex(32))
-    api_token
-  end
 
   def in_basket?(recipe)
     baskets.exists?(recipe: recipe)

@@ -8,15 +8,14 @@ info:
 
     ## Authentication
 
-    Some endpoints require authentication via Bearer token. To get a token:
+    **All endpoints require authentication** via a Bearer API key.
 
-    ```ruby
-    # In Rails console (bin/rails console)
-    user = User.find_by(email: "your@email.com")
-    user.generate_api_token!
-    ```
+    Create a key on the [Account page](/account) (API Keys section): give it a
+    name, click **Create key**, and copy the `sb_...` token — it is shown
+    exactly once and cannot be retrieved again. Keys can be revoked from the
+    same page at any time.
 
-    Click the **Authorize** button above and enter your token (without "Bearer" prefix).
+    Click the **Authorize** button above and enter your key (without "Bearer" prefix).
 paths:
   "/api/v1/baskets":
     get:
@@ -120,6 +119,8 @@ paths:
       summary: List categories
       tags:
       - Categories
+      security:
+      - bearer_auth: []
       responses:
         '200':
           description: categories found
@@ -132,6 +133,12 @@ paths:
                     type: array
                     items:
                       "$ref": "#/components/schemas/Category"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
   "/api/v1/categories/{id}":
     parameters:
     - name: id
@@ -143,6 +150,8 @@ paths:
       summary: Show a category with recipes
       tags:
       - Categories
+      security:
+      - bearer_auth: []
       parameters:
       - name: page
         in: query
@@ -173,11 +182,19 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/Error"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
   "/api/v1/recipes":
     get:
       summary: List recipes
       tags:
       - Recipes
+      security:
+      - bearer_auth: []
       parameters:
       - name: page
         in: query
@@ -205,6 +222,12 @@ paths:
                       "$ref": "#/components/schemas/Recipe"
                   pagination:
                     "$ref": "#/components/schemas/Pagination"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
     post:
       summary: Create a recipe
       tags:
@@ -279,6 +302,8 @@ paths:
       summary: Search recipes
       tags:
       - Recipes
+      security:
+      - bearer_auth: []
       parameters:
       - name: query
         in: query
@@ -293,7 +318,7 @@ paths:
           type: integer
       responses:
         '200':
-          description: search results
+          description: SQL metacharacters are treated literally
           content:
             application/json:
               schema:
@@ -305,6 +330,12 @@ paths:
                       "$ref": "#/components/schemas/Recipe"
                   pagination:
                     "$ref": "#/components/schemas/Pagination"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
   "/api/v1/recipes/{id}":
     parameters:
     - name: id
@@ -316,6 +347,8 @@ paths:
       summary: Show a recipe
       tags:
       - Recipes
+      security:
+      - bearer_auth: []
       responses:
         '200':
           description: recipe found
@@ -325,6 +358,12 @@ paths:
                 "$ref": "#/components/schemas/Recipe"
         '404':
           description: recipe not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+        '401':
+          description: unauthorized
           content:
             application/json:
               schema:

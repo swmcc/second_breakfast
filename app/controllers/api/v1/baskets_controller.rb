@@ -3,8 +3,6 @@
 module Api
   module V1
     class BasketsController < BaseController
-      before_action :authenticate_api_token!
-
       def index
         @baskets = current_user.baskets.includes(recipe: :category)
       end

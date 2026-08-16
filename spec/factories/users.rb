@@ -4,10 +4,6 @@ FactoryBot.define do
     password { "password123" }
     password_confirmation { "password123" }
 
-    trait :with_api_token do
-      api_token { SecureRandom.hex(32) }
-    end
-
     trait :with_basket do
       transient do
         recipes_count { 1 }

@@ -3,8 +3,8 @@
 require "rails_helper"
 
 RSpec.describe "Api::V1::Recipes Image Upload", type: :request do
-  let(:user) { create(:user, :with_api_token) }
-  let(:headers) { { "Authorization" => "Bearer #{user.api_token}", "Content-Type" => "application/json", "Accept" => "application/json" } }
+  let(:api_key) { create(:api_key) }
+  let(:headers) { { "Authorization" => "Bearer #{api_key.token}", "Content-Type" => "application/json", "Accept" => "application/json" } }
   let(:category) { create(:category) }
 
   # Small 1x1 red pixel JPEG in base64
