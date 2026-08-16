@@ -52,6 +52,19 @@ RSpec.describe "Recipes", type: :system do
       expect(page).to have_field("Title")
     end
 
+    it "can add and remove ingredient rows on the new recipe form" do
+      visit new_recipe_path
+
+      expect(page).to have_no_field("recipe[ingredients][][name]", type: "text")
+
+      click_button "Add Ingredient"
+      click_button "Add Ingredient"
+      expect(page).to have_field("recipe[ingredients][][name]", type: "text", count: 2)
+
+      first("button", text: "Remove").click
+      expect(page).to have_field("recipe[ingredients][][name]", type: "text", count: 1)
+    end
+
     context "with an existing recipe" do
       let!(:recipe) { create(:recipe, title: "Old Title") }
 

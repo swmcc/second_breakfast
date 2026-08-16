@@ -43,16 +43,16 @@
 </div>
 
   <!-- Ingredients Section -->
-  <div class="my-5">
+  <div class="my-5" data-controller="ingredients">
     <%= form.label :ingredients %>
-    <div id="ingredients" class="mt-2">
+    <div id="ingredients" class="mt-2" data-ingredients-target="list">
       <!-- Template for new ingredients -->
-      <template id="ingredient-template">
+      <template data-ingredients-target="template">
         <div class="flex gap-2 mb-2">
           <input type="text" name="recipe[ingredients][][name]" placeholder="Name" class="shadow rounded-md border px-3 py-2 flex-grow">
           <input type="number" name="recipe[ingredients][][quantity]" placeholder="Quantity" class="shadow rounded-md border px-3 py-2 w-24">
           <input type="text" name="recipe[ingredients][][unit]" placeholder="Unit" class="shadow rounded-md border px-3 py-2 w-24">
-          <button type="button" onclick="this.parentElement.remove()" class="px-3 py-2 bg-red-600 text-white rounded-md">Remove</button>
+          <button type="button" data-action="ingredients#remove" class="px-3 py-2 bg-red-600 text-white rounded-md">Remove</button>
         </div>
       </template>
 
@@ -63,24 +63,14 @@
             <input type="text" name="recipe[ingredients][][name]" value="<%= ingredient['name'] %>" placeholder="Name" class="shadow rounded-md border px-3 py-2 flex-grow">
             <input type="number" name="recipe[ingredients][][quantity]" value="<%= ingredient['quantity'] %>" placeholder="Quantity" class="shadow rounded-md border px-3 py-2 w-24">
             <input type="text" name="recipe[ingredients][][unit]" value="<%= ingredient['unit'] %>" placeholder="Unit" class="shadow rounded-md border px-3 py-2 w-24">
-            <button type="button" onclick="this.parentElement.remove()" class="px-3 py-2 bg-red-600 text-white rounded-md">Remove</button>
+            <button type="button" data-action="ingredients#remove" class="px-3 py-2 bg-red-600 text-white rounded-md">Remove</button>
           </div>
         <% end %>
       <% end %>
     </div>
 
     <!-- Add Ingredient Button -->
-    <button type="button" onclick="addIngredient()" class="mt-2 px-3 py-2 bg-green-600 text-white rounded-md">Add Ingredient</button>
-
-    <!-- Script for adding ingredients dynamically -->
-    <script>
-      function addIngredient() {
-        const template = document.getElementById('ingredient-template');
-        const ingredientsDiv = document.getElementById('ingredients');
-        const clone = template.content.cloneNode(true);
-        ingredientsDiv.appendChild(clone);
-      }
-    </script>
+    <button type="button" data-action="ingredients#add" class="mt-2 px-3 py-2 bg-green-600 text-white rounded-md">Add Ingredient</button>
   </div>
 
   <!-- Other Fields (Prep Time, Nutrition, etc.) -->
