@@ -109,6 +109,24 @@ Create a new recipe with all fields. An image is automatically fetched in the ba
 
 **Note:** Recipe creation returns immediately. The image is fetched asynchronously by a background job and will appear shortly after.
 
+### Meal plan tools
+
+Weekly meal plans run Monday–Sunday, one plan per week. Draft plans are editable; accepting locks a plan (reopen until the week ends); past weeks are read-only archive.
+
+- `list_meal_plans` — list plans, newest first (`filter`: `active` / `archived`)
+- `get_meal_plan` — a plan's full Monday–Sunday grid (`id`)
+- `create_meal_plan` — plan a week (`week_start_date` optional; defaults to the current week, any date normalises to Monday; past weeks rejected)
+- `add_meal_to_plan` — add a recipe to a day (`plan_id`, `recipe_id`, `day`)
+- `remove_meal_from_plan` — remove an entry (`plan_id`, `entry_id`)
+- `accept_meal_plan` / `reopen_meal_plan` — lock / unlock a plan (`id`)
+- `get_meal_plan_shopping_list` — aggregated ingredients for the week (`id`)
+
+**Example prompt:**
+```
+Plan next week for me: use my existing recipes, fish twice,
+no beef, and keep breakfasts quick. Then show me the shopping list.
+```
+
 ## Example Workflows
 
 ### Import Recipe from Photo
