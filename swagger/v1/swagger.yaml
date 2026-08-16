@@ -719,6 +719,195 @@ paths:
           description: recipe deleted
         '401':
           description: unauthorized
+  "/api/v1/syndication/meal_plan":
+    get:
+      summary: Current week's meal plan for syndication (public, no auth)
+      tags:
+      - Syndication
+      security: []
+      description: Public feed of the current week's meal plan for embedding on swm.cc.
+        Returns the plan for the site owner's account; meal_plan is null when nothing
+        is planned.
+      responses:
+        '200':
+          description: no plan for the current week
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  week_start_date:
+                    type: string
+                    format: date
+                  week_end_date:
+                    type: string
+                    format: date
+                  meal_plan:
+                    type: object
+                    nullable: true
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                        - draft
+                        - accepted
+                      days:
+                        type: object
+                        properties:
+                          monday:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                title:
+                                  type: string
+                                description:
+                                  type: string
+                                  nullable: true
+                                category:
+                                  type: string
+                                  nullable: true
+                                serves:
+                                  type: integer
+                                  nullable: true
+                                prep_time:
+                                  type: string
+                                  nullable: true
+                                image_url:
+                                  type: string
+                                  nullable: true
+                          tuesday:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                title:
+                                  type: string
+                                description:
+                                  type: string
+                                  nullable: true
+                                category:
+                                  type: string
+                                  nullable: true
+                                serves:
+                                  type: integer
+                                  nullable: true
+                                prep_time:
+                                  type: string
+                                  nullable: true
+                                image_url:
+                                  type: string
+                                  nullable: true
+                          wednesday:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                title:
+                                  type: string
+                                description:
+                                  type: string
+                                  nullable: true
+                                category:
+                                  type: string
+                                  nullable: true
+                                serves:
+                                  type: integer
+                                  nullable: true
+                                prep_time:
+                                  type: string
+                                  nullable: true
+                                image_url:
+                                  type: string
+                                  nullable: true
+                          thursday:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                title:
+                                  type: string
+                                description:
+                                  type: string
+                                  nullable: true
+                                category:
+                                  type: string
+                                  nullable: true
+                                serves:
+                                  type: integer
+                                  nullable: true
+                                prep_time:
+                                  type: string
+                                  nullable: true
+                                image_url:
+                                  type: string
+                                  nullable: true
+                          friday:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                title:
+                                  type: string
+                                description:
+                                  type: string
+                                  nullable: true
+                                category:
+                                  type: string
+                                  nullable: true
+                                serves:
+                                  type: integer
+                                  nullable: true
+                                prep_time:
+                                  type: string
+                                  nullable: true
+                                image_url:
+                                  type: string
+                                  nullable: true
+                          saturday:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                title:
+                                  type: string
+                                description:
+                                  type: string
+                                  nullable: true
+                                category:
+                                  type: string
+                                  nullable: true
+                                serves:
+                                  type: integer
+                                  nullable: true
+                                prep_time:
+                                  type: string
+                                  nullable: true
+                                image_url:
+                                  type: string
+                                  nullable: true
+                          sunday:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                title:
+                                  type: string
+                                description:
+                                  type: string
+                                  nullable: true
+                                category:
+                                  type: string
+                                  nullable: true
+                                serves:
+                                  type: integer
+                                  nullable: true
+                                prep_time:
+                                  type: string
+                                  nullable: true
+                                image_url:
+                                  type: string
+                                  nullable: true
 servers:
 - url: "{protocol}://{host}"
   variables:

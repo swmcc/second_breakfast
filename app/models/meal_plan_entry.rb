@@ -3,7 +3,8 @@
 class MealPlanEntry < ApplicationRecord
   DAYS = %w[monday tuesday wednesday thursday friday saturday sunday].freeze
 
-  belongs_to :meal_plan
+  # touch keeps MealPlan#updated_at honest for the syndication ETag
+  belongs_to :meal_plan, touch: true
   belongs_to :recipe
 
   validates :day_of_week, inclusion: { in: 0..6 }
