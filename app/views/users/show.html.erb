@@ -13,6 +13,70 @@
     </div>
 
     <div class="p-6">
+      <h2 class="font-semibold text-gray-900">API keys</h2>
+      <p class="mt-1 text-sm text-gray-600">Keys grant full access to the JSON API. Treat them like passwords.</p>
+
+      <% if flash[:new_api_key_token].present? %>
+        <div class="mt-4 rounded-md border border-indigo-200 bg-indigo-50 p-4"
+             data-controller="clipboard"
+             data-clipboard-text-value="<%= flash[:new_api_key_token] %>">
+          <p class="text-sm font-medium text-indigo-900">
+            Key &ldquo;<%= flash[:new_api_key_name] %>&rdquo; created. Copy it now &mdash; it will not be shown again.
+          </p>
+          <div class="mt-2 flex items-center gap-x-2">
+            <code class="block overflow-x-auto rounded bg-white px-2 py-1 text-sm text-gray-900 ring-1 ring-inset ring-indigo-200"><%= flash[:new_api_key_token] %></code>
+            <button type="button" data-action="clipboard#copy"
+                    class="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+              <svg data-clipboard-target="icon" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+              </svg>
+              <span data-clipboard-target="text">Copy</span>
+            </button>
+          </div>
+        </div>
+      <% end %>
+
+      <%= form_with url: api_keys_path, scope: :api_key, class: "mt-4 flex items-end gap-x-2" do |form| %>
+        <div class="flex-grow">
+          <%= form.label :name, "Key name", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :name, placeholder: "e.g. MCP server", required: true,
+              class: "mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm" %>
+        </div>
+        <%= form.submit "Create key",
+            class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
+      <% end %>
+
+      <% if @api_keys.any? %>
+        <ul class="mt-4 divide-y divide-gray-100">
+          <% @api_keys.each do |key| %>
+            <li class="flex items-center justify-between gap-x-4 py-3">
+              <div>
+                <p class="text-sm font-medium <%= key.active? ? "text-gray-900" : "text-gray-400 line-through" %>">
+                  <%= key.name %>
+                </p>
+                <p class="mt-1 text-xs text-gray-500">
+                  <code><%= key.prefix %>&hellip;</code>
+                  &middot; Created <%= key.created_at.to_date %>
+                  &middot; Last used <%= key.last_used_at ? key.last_used_at.to_date : "Never" %>
+                </p>
+              </div>
+              <% if key.active? %>
+                <%= link_to "Revoke", api_key_path(key),
+                    class: "rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500",
+                    data: {
+                      turbo_method: :delete,
+                      turbo_confirm: "Revoke this key? Clients using it will stop working immediately."
+                    } %>
+              <% else %>
+                <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">Revoked</span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+
+    <div class="p-6">
       <h2 class="font-semibold text-gray-900">Delete account</h2>
       <p class="mt-1 text-sm text-gray-600">Permanently delete your account and all saved basket selections. This cannot be undone.</p>
       <%= link_to "Delete account", account_path,

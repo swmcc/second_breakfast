@@ -2,16 +2,12 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["content", "button", "text", "icon"]
+  static values = { text: String }
 
   async copy() {
-    const content = this.contentTarget
-    const items = content.querySelectorAll("li")
-
-    const text = Array.from(items).map(li => {
-      const name = li.querySelector("span:first-child")?.textContent?.trim() || ""
-      const quantity = li.querySelector("span:last-child")?.textContent?.trim() || ""
-      return `${name}: ${quantity}`
-    }).join("\n")
+    const text = this.hasTextValue && this.textValue !== ""
+      ? this.textValue
+      : this.ingredientsText()
 
     try {
       await navigator.clipboard.writeText(text)
@@ -28,6 +24,16 @@ export default class extends Controller {
       document.body.removeChild(textarea)
       this.showCopied()
     }
+  }
+
+  ingredientsText() {
+    const items = this.contentTarget.querySelectorAll("li")
+
+    return Array.from(items).map(li => {
+      const name = li.querySelector("span:first-child")?.textContent?.trim() || ""
+      const quantity = li.querySelector("span:last-child")?.textContent?.trim() || ""
+      return `${name}: ${quantity}`
+    }).join("\n")
   }
 
   showCopied() {
