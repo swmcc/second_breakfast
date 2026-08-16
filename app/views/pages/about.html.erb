@@ -1,0 +1,27 @@
+<% content_for :title, "About | Second Breakfast" %>
+
+<article class="mx-auto max-w-3xl space-y-8 text-gray-700">
+  <header>
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">About Second Breakfast</h1>
+  </header>
+
+  <section class="space-y-3">
+    <p>Second Breakfast is my personal recipe collection and meal planner. It holds the recipes I actually cook &mdash; a lot of them chosen to be kind to type 2 diabetes &mdash; and turns them into a plan for the week ahead.</p>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-xl font-semibold text-gray-900">How I use it</h2>
+    <p>Every week gets a meal plan running Monday to Sunday. I can fill it by hand, or let the app pick a breakfast, lunch and dinner for each day from my recipes. Once a plan looks right I accept it, which locks it in; finished weeks archive themselves into read-only history. Each plan rolls its ingredients up into a shopping list I can print or copy.</p>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-xl font-semibold text-gray-900">The Claude integration</h2>
+    <p>The part I enjoy most: the site ships with an <a href="https://modelcontextprotocol.io" class="font-medium text-indigo-600 hover:text-indigo-500">MCP (Model Context Protocol)</a> server, which means <a href="https://claude.ai" class="font-medium text-indigo-600 hover:text-indigo-500">Claude</a> can use it directly. I photograph a recipe from a cookbook, hand it to Claude, and it extracts the ingredients, instructions and nutrition and files the recipe here &mdash; image included.</p>
+    <p>Claude can also plan whole weeks conversationally (&ldquo;plan next week, fish twice, no beef&rdquo;) and read back the shopping list. Everything goes through the same JSON API, authenticated with revocable API keys I manage from my account page.</p>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-xl font-semibold text-gray-900">What I'm eating</h2>
+    <p>The current week's plan is syndicated to <a href="https://swm.cc" class="font-medium text-indigo-600 hover:text-indigo-500">swm.cc</a>, so anyone curious can see what's on the menu.</p>
+  </section>
+</article>

@@ -15,6 +15,33 @@ RSpec.describe "Pages" do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Terms of Use")
     end
+
+    it "renders the about page while signed out" do
+      get about_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("About Second Breakfast")
+      expect(response.body).to include("MCP (Model Context Protocol)")
+    end
+
+    it "renders the colophon while signed out" do
+      get colophon_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("The technical details behind this site.")
+      expect(response.body).to include("github.com/swmcc/second_breakfast")
+    end
+  end
+
+  describe "footer" do
+    it "links About, Colophon and swm.cc" do
+      get privacy_path
+
+      expect(response.body).to include(%(href="/about"))
+      expect(response.body).to include(%(href="/colophon"))
+      expect(response.body).to include(%(href="https://swm.cc"))
+      expect(response.body).to include("Built with")
+    end
   end
 
   describe "GET / (root)" do
