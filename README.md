@@ -9,9 +9,10 @@ A recipe discovery and meal planning application built with Ruby on Rails. Brows
 ## Features
 
 - **Recipe Browsing** - Browse recipes with search by title and ingredients
-- **Categories** - Organized by meal type (Breakfast, Main Course, Dessert)
-- **Meal Planning** - Add recipes to your basket to plan meals
-- **Smart Shopping Lists** - Automatically aggregates ingredients across selected recipes
+- **Categories** - Organized by meal type (Breakfast, Lunch, Dinner, Desserts)
+- **Weekly Meal Plans** - Plan Monday-Sunday, one plan per week, with an auto-fill option that picks a breakfast, lunch and dinner for every day. Draft plans are editable; accept a plan to lock it (reopen until the week ends); past weeks archive automatically as read-only history
+- **Saved Recipes** - Bookmark recipes into a pool that feeds the meal plan picker
+- **Smart Shopping Lists** - Automatically aggregates ingredients across a plan's recipes, with print and copy
 - **Rich Content** - Full recipe details with images, prep time, servings, and nutrition info
 
 ## Tech Stack
@@ -166,6 +167,14 @@ Interactive API documentation available at [/api-docs](/api-docs) (Swagger UI).
 | GET | `/api/v1/baskets` | Yes | User's basket |
 | POST | `/api/v1/baskets` | Yes | Add recipe to basket |
 | DELETE | `/api/v1/baskets/:id` | Yes | Remove from basket |
+| GET | `/api/v1/meal_plans` | Yes | List weekly meal plans (`?filter=active\|archived`) |
+| POST | `/api/v1/meal_plans` | Yes | Plan a week (`auto_fill: true` picks a breakfast, lunch and dinner per day) |
+| GET | `/api/v1/meal_plans/:id` | Yes | A plan's Monday-Sunday grid |
+| POST | `/api/v1/meal_plans/:id/accept` | Yes | Lock a plan |
+| POST | `/api/v1/meal_plans/:id/reopen` | Yes | Unlock (until the week ends) |
+| GET | `/api/v1/meal_plans/:id/shopping_list` | Yes | Aggregated ingredients for the week |
+| POST | `/api/v1/meal_plans/:id/entries` | Yes | Add a recipe to a day |
+| DELETE | `/api/v1/meal_plans/:id/entries/:id` | Yes | Remove a recipe from a day |
 
 ### Authentication
 

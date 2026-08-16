@@ -39,9 +39,13 @@
       <% else %>
         <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p class="text-gray-600">Nothing planned for this week yet.</p>
-          <%= form_with url: meal_plans_path, class: "contents" do |form| %>
+          <%= form_with url: meal_plans_path, class: "flex flex-col items-start gap-2 sm:items-end" do |form| %>
             <%= form.submit "Plan this week",
                 class: "inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
+            <label class="flex items-center gap-x-2 text-xs text-gray-600">
+              <%= form.check_box :auto_fill, { checked: true, name: "meal_plan[auto_fill]", class: "h-4 w-4 rounded border-gray-300 text-indigo-600" }, "1", "0" %>
+              Pick my meals for me &mdash; a breakfast, lunch and dinner each day
+            </label>
           <% end %>
         </div>
       <% end %>
@@ -80,6 +84,10 @@
       </div>
       <%= form.submit "Create plan",
           class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 cursor-pointer" %>
+      <label class="flex items-center gap-x-2 pb-2.5 text-xs text-gray-600">
+        <%= form.check_box :auto_fill, { checked: true, name: "meal_plan[auto_fill]", class: "h-4 w-4 rounded border-gray-300 text-indigo-600" }, "1", "0" %>
+        Pick my meals for me
+      </label>
     <% end %>
     <p class="mt-2 text-xs text-gray-500">Pick any date &mdash; the plan snaps to that week's Monday. One plan per week.</p>
   </div>

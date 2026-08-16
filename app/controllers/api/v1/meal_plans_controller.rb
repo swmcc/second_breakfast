@@ -26,6 +26,7 @@ module Api
         meal_plan = current_user.meal_plans.new(week_start_date: week_start)
 
         if meal_plan.save
+          meal_plan.auto_fill! if ActiveModel::Type::Boolean.new.cast(params.dig(:meal_plan, :auto_fill))
           render json: plan_json(meal_plan), status: :created
         elsif (existing = duplicate_week_plan(meal_plan))
           render json: {

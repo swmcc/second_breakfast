@@ -227,10 +227,15 @@ server.tool(
       .string()
       .optional()
       .describe("Optional date (YYYY-MM-DD) inside the target week. Omit for the current week."),
+    auto_fill: z
+      .boolean()
+      .optional()
+      .describe("If true, automatically fills the week with one breakfast, one lunch and one dinner per day, picked from the user's recipes by category."),
   },
-  async ({ week_start_date }) => {
+  async ({ week_start_date, auto_fill }) => {
     const body = { meal_plan: {} };
     if (week_start_date) body.meal_plan.week_start_date = week_start_date;
+    if (auto_fill) body.meal_plan.auto_fill = true;
     const data = await apiRequest("POST", "/meal_plans", body);
     return {
       content: [{ type: "text", text: `Meal plan created for week beginning ${data.week_start_date}.\n\n${JSON.stringify(data, null, 2)}` }],

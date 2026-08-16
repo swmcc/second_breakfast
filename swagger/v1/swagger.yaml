@@ -256,7 +256,7 @@ paths:
       parameters: []
       responses:
         '201':
-          description: defaults to the current week
+          description: auto-fills the week when requested
         '409':
           description: week already planned
           content:
@@ -294,6 +294,10 @@ paths:
                       format: date
                       description: Any date in the target week; normalised to Monday.
                         Defaults to the current week.
+                    auto_fill:
+                      type: boolean
+                      description: Automatically fill the week with one breakfast,
+                        lunch and dinner per day, picked by category.
   "/api/v1/meal_plans/{id}":
     parameters:
     - name: id

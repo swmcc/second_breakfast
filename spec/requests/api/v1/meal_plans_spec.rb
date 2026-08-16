@@ -83,7 +83,8 @@ RSpec.describe "Api::V1::MealPlans", type: :request do
           meal_plan: {
             type: :object,
             properties: {
-              week_start_date: { type: :string, format: "date", description: "Any date in the target week; normalised to Monday. Defaults to the current week." }
+              week_start_date: { type: :string, format: "date", description: "Any date in the target week; normalised to Monday. Defaults to the current week." },
+              auto_fill: { type: :boolean, description: "Automatically fill the week with one breakfast, lunch and dinner per day, picked by category." }
             }
           }
         }
@@ -105,6 +106,17 @@ RSpec.describe "Api::V1::MealPlans", type: :request do
 
         run_test! do |response|
           expect(response.parsed_body["week_start_date"]).to eq(monday.iso8601)
+        end
+      end
+
+      response "201", "auto-fills the week when requested" do
+        let(:meal_plan) { { meal_plan: { auto_fill: true } } }
+
+        before { create(:recipe, category: create(:category, name: "Breakfast")) }
+
+        run_test! do |response|
+          days = response.parsed_body["days"]
+          expect(days.values.sum(&:size)).to eq(7)
         end
       end
 

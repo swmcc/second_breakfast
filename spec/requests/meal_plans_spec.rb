@@ -24,11 +24,33 @@ RSpec.describe "MealPlans", type: :request do
   describe "POST /meal_plans" do
     before { sign_in(user) }
 
-    it "creates a plan for the current week by default" do
+    it "creates a plan for the current week and auto-fills it by default" do
+      breakfast = create(:category, name: "Breakfast")
+      create(:recipe, category: breakfast)
+
       post meal_plans_path
 
       plan = user.meal_plans.sole
       expect(plan.week_start_date).to eq(monday)
+      expect(plan.meal_plan_entries.count).to eq(7)
+      expect(response).to redirect_to(meal_plan_path(plan))
+    end
+
+    it "creates an empty plan when auto-fill is unticked" do
+      create(:recipe, category: create(:category, name: "Breakfast"))
+
+      post meal_plans_path, params: { meal_plan: { auto_fill: "0" } }
+
+      expect(user.meal_plans.sole.meal_plan_entries.count).to eq(0)
+    end
+
+    it "auto-fills an existing draft plan via the board action" do
+      create(:recipe, category: create(:category, name: "Dinner"))
+      plan = create(:meal_plan, user: user)
+
+      post auto_fill_meal_plan_path(plan)
+
+      expect(plan.meal_plan_entries.count).to eq(7)
       expect(response).to redirect_to(meal_plan_path(plan))
     end
 
