@@ -4,6 +4,8 @@ class FetchRecipeImageJob < ApplicationJob
   queue_as :default
 
   ALLOWED_CONTENT_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
+  MAX_IMAGE_BYTES = 2_000_000
+  PEXELS_SEARCH_URL = "https://api.pexels.com/v1/search"
 
   def perform(recipe_id, search_query = nil)
     recipe = Recipe.find_by(id: recipe_id)
@@ -20,50 +22,64 @@ class FetchRecipeImageJob < ApplicationJob
   private
 
   def fetch_image(query)
-    search_query = URI.encode_www_form_component("#{query} recipe")
+    api_key = ENV["PEXELS_API_KEY"]
+    if api_key.blank?
+      Rails.logger.warn("FetchRecipeImageJob skipped: PEXELS_API_KEY is not set")
+      return nil
+    end
 
-    # Get DuckDuckGo vqd token
-    token_url = "https://duckduckgo.com/?q=#{search_query}&iax=images&ia=images"
-    token_response = fetch_with_timeout(token_url)
-    return nil unless token_response
+    image_url = search_pexels(query, api_key)
+    return nil unless image_url
 
-    vqd = token_response.body.match(/vqd=([^&"]+)/)&.[](1)
-    return nil unless vqd
+    download_image(image_url)
+  rescue StandardError => e
+    Rails.logger.warn("FetchRecipeImageJob error for #{query.inspect}: #{e.message}")
+    nil
+  end
 
-    # Search images
-    api_url = "https://duckduckgo.com/i.js?l=us-en&o=json&q=#{search_query}&vqd=#{vqd}&f=,,,,,&p=1"
-    api_response = fetch_with_timeout(api_url)
-    return nil unless api_response
+  def search_pexels(query, api_key)
+    search_term = URI.encode_www_form_component("#{query} recipe")
+    response = fetch_with_timeout("#{PEXELS_SEARCH_URL}?query=#{search_term}&per_page=5",
+                                  headers: { "Authorization" => api_key })
+    unless response
+      Rails.logger.warn("FetchRecipeImageJob got no usable response from Pexels for #{query.inspect}")
+      return nil
+    end
 
-    data = JSON.parse(api_response.body)
-    results = data["results"]
-    return nil if results.blank?
+    photos = JSON.parse(response.body)["photos"]
+    if photos.blank?
+      Rails.logger.warn("FetchRecipeImageJob found no Pexels photos for #{query.inspect}")
+      return nil
+    end
 
-    # Find reasonably sized image
-    result = results.find { |r| r["width"].to_i < 1200 && r["width"].to_i > 300 } || results.first
-    image_url = result["image"]
+    photos.first.dig("src", "large")
+  end
 
-    # Download image
-    image_response = fetch_with_timeout(image_url)
-    return nil unless image_response
-    return nil if image_response.body.bytesize > 2_000_000
+  def download_image(image_url)
+    response = fetch_with_timeout(image_url)
+    unless response
+      Rails.logger.warn("FetchRecipeImageJob failed to download image from #{image_url}")
+      return nil
+    end
 
-    content_type = image_response["Content-Type"].to_s.split(";", 2).first.to_s.strip.downcase
+    if response.body.bytesize > MAX_IMAGE_BYTES
+      Rails.logger.warn("FetchRecipeImageJob skipped oversized image (#{response.body.bytesize} bytes) from #{image_url}")
+      return nil
+    end
+
+    content_type = response["Content-Type"].to_s.split(";", 2).first.to_s.strip.downcase
     unless content_type.start_with?("image/") && content_type.in?(ALLOWED_CONTENT_TYPES)
       Rails.logger.warn("FetchRecipeImageJob skipped unsupported image Content-Type: #{content_type.presence || 'missing'}")
       return nil
     end
 
     {
-      data: image_response.body,
+      data: response.body,
       content_type: content_type
     }
-  rescue StandardError => e
-    Rails.logger.error("FetchRecipeImageJob error: #{e.message}")
-    nil
   end
 
-  def fetch_with_timeout(url, timeout: 10)
+  def fetch_with_timeout(url, timeout: 10, headers: {})
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = uri.scheme == "https"
@@ -72,6 +88,7 @@ class FetchRecipeImageJob < ApplicationJob
 
     request = Net::HTTP::Get.new(uri)
     request["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    headers.each { |key, value| request[key] = value }
 
     response = http.request(request)
     response.is_a?(Net::HTTPSuccess) ? response : nil
