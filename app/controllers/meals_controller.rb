@@ -11,17 +11,17 @@ class MealsController < ApplicationController
   def destroy
     basket = find_basket
     basket&.destroy
-    redirect_to meal_plan_path, notice: "Recipe removed from your meal plan!"
+    redirect_to meals_path, notice: "Recipe removed from your saved recipes!"
   end
 
   def toggle
     basket = find_basket
     if basket
       basket.destroy
-      flash_message = "Recipe removed from your meal plan!"
+      flash_message = "Recipe removed from your saved recipes!"
     else
       current_user.baskets.create(recipe: @recipe)
-      flash_message = "Recipe added to your meal plan!"
+      flash_message = "Recipe saved!"
     end
 
     redirect_back fallback_location: recipes_path, notice: flash_message

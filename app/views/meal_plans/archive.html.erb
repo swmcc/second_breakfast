@@ -1,0 +1,31 @@
+<% content_for :title, "Meal Plan Archive | Second Breakfast" %>
+
+<section class="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+  <div class="flex items-center gap-x-3">
+    <%= link_to meal_plans_path, class: "text-gray-400 hover:text-gray-600" do %>
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+      </svg>
+      <span class="sr-only">Back to meal plans</span>
+    <% end %>
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Archive</h1>
+  </div>
+  <p class="mt-2 text-gray-600">Past weeks, kept read-only.</p>
+
+  <% if @meal_plans.any? %>
+    <ul class="mt-8 divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
+      <% @meal_plans.each do |plan| %>
+        <li>
+          <%= link_to meal_plan_path(plan), class: "flex items-center justify-between px-6 py-4 hover:bg-gray-50" do %>
+            <span class="font-medium text-gray-900">
+              <%= plan.week_start_date.strftime("%-d %b") %> &ndash; <%= plan.week_end_date.strftime("%-d %b %Y") %>
+            </span>
+            <span class="text-sm text-gray-500"><%= pluralize(plan.meal_plan_entries.size, "meal") %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="mt-8 text-sm text-gray-500">No archived weeks yet &mdash; finish a week and it will land here.</p>
+  <% end %>
+</section>

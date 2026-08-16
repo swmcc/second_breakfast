@@ -4,40 +4,40 @@ RSpec.describe "Meals" do
   let(:user) { create(:user) }
   let(:recipe) { create(:recipe) }
 
-  describe "GET /meal-plan" do
+  describe "GET /meals" do
     context "when authenticated" do
       before { sign_in(user) }
 
       it "returns success" do
-        get meal_plan_path
+        get meals_path
         expect(response).to have_http_status(:success)
       end
 
       it "displays empty state when no meals planned" do
-        get meal_plan_path
-        expect(response.body).to include("No meals planned")
+        get meals_path
+        expect(response.body).to include("No saved recipes")
       end
 
       context "with meals in the plan" do
         let!(:basket) { create(:basket, user: user, recipe: recipe) }
 
         it "displays the recipe" do
-          get meal_plan_path
+          get meals_path
           expect(response.body).to include(recipe.title)
         end
 
         it "displays serves information" do
-          get meal_plan_path
+          get meals_path
           expect(response.body).to include("Serves #{recipe.serves}")
         end
 
         it "displays prep time" do
-          get meal_plan_path
+          get meals_path
           expect(response.body).to include(recipe.prep_time)
         end
 
         it "displays shopping list section" do
-          get meal_plan_path
+          get meals_path
           expect(response.body).to include("Shopping List")
         end
       end
@@ -45,7 +45,7 @@ RSpec.describe "Meals" do
 
     context "when not authenticated" do
       it "redirects to login" do
-        get meal_plan_path
+        get meals_path
         expect(response).to redirect_to(sign_in_path)
       end
     end
@@ -64,15 +64,15 @@ RSpec.describe "Meals" do
           }.to change(user.baskets, :count).by(-1)
         end
 
-        it "redirects to meal plan" do
+        it "redirects to saved recipes" do
           delete meal_path(basket), params: { recipe_id: recipe.id }
-          expect(response).to redirect_to(meal_plan_path)
+          expect(response).to redirect_to(meals_path)
         end
 
         it "shows success notice" do
           delete meal_path(basket), params: { recipe_id: recipe.id }
           follow_redirect!
-          expect(response.body).to include("Recipe removed from your meal plan!")
+          expect(response.body).to include("Recipe removed from your saved recipes!")
         end
       end
     end
@@ -101,7 +101,7 @@ RSpec.describe "Meals" do
         it "shows add message" do
           post toggle_meal_path, params: { recipe_id: recipe.id }
           follow_redirect!
-          expect(response.body).to include("Recipe added to your meal plan!")
+          expect(response.body).to include("Recipe saved!")
         end
       end
 
@@ -117,7 +117,7 @@ RSpec.describe "Meals" do
         it "shows remove message" do
           post toggle_meal_path, params: { recipe_id: recipe.id }
           follow_redirect!
-          expect(response.body).to include("Recipe removed from your meal plan!")
+          expect(response.body).to include("Recipe removed from your saved recipes!")
         end
       end
 

@@ -15,13 +15,13 @@
       <%= button_to toggle_meal_path(recipe_id: @recipe.id),
           method: :post,
           class: "rounded-md px-3.5 py-2.5 bg-green-500 hover:bg-green-400 text-white font-medium inline-flex items-center" do %>
-        <span>In Meal Plan</span>
+        <span>Saved</span>
       <% end %>
     <% else %>
       <%= button_to toggle_meal_path(recipe_id: @recipe.id),
           method: :post,
           class: "rounded-md px-3.5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white font-medium inline-flex items-center" do %>
-        <span>Add to Meal Plan</span>
+        <span>Save Recipe</span>
       <% end %>
     <% end %>
   <% end %>

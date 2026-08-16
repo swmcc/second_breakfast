@@ -5,7 +5,7 @@
 
   <div class="flex items-center justify-between">
     <div class="flex-auto">
-      <h1 class="text-2xl font-semibold leading-6 text-gray-900">Meal Plan</h1>
+      <h1 class="text-2xl font-semibold leading-6 text-gray-900">Saved Recipes</h1>
       <p class="mt-2 text-sm text-gray-700">Your selected meals and shopping list.</p>
     </div>
     <% if @baskets.any? %>
@@ -98,8 +98,8 @@
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No meals planned</h3>
-        <p class="mt-1 text-sm text-gray-500">Get started by adding some recipes to your meal plan.</p>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No saved recipes</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by saving some recipes.</p>
         <div class="mt-6">
           <%= link_to recipes_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" do %>
             Browse Recipes

@@ -45,10 +45,22 @@ Rails.application.routes.draw do
 
   resources :categories
 
-  # Meal plan routes
+  # Weekly meal plans
+  resources :meal_plans, only: [ :index, :show, :create, :destroy ] do
+    collection do
+      get :archive
+    end
+    member do
+      post :accept
+      post :reopen
+    end
+    resources :entries, controller: "meal_plan_entries", only: [ :create, :destroy ]
+  end
+
+  # Saved recipes (legacy basket) — feeds the meal plan picker
   resources :meals, controller: "meals", only: [ :index, :destroy ]
   post "meals/toggle", to: "meals#toggle", as: "toggle_meal"
-  get "meal-plan", to: "meals#index", as: "meal_plan"
+  get "meal-plan", to: redirect("/meal_plans")
 
 
   get "up" => "rails/health#show", as: :rails_health_check
