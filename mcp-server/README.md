@@ -16,16 +16,17 @@ The server requires two environment variables:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `API_URL` | Second Breakfast API base URL | `http://localhost:3000/api/v1` |
-| `API_TOKEN` | Your API authentication token | (required for write operations) |
+| `API_TOKEN` | Your API key | (required) |
 
-### Getting an API Token
+**Every** operation — including reads and search — requires the key; the server exits at startup if `API_TOKEN` is missing.
 
-```ruby
-# In Rails console (bin/rails console)
-user = User.find_by(email: "your@email.com")
-user.generate_api_token!
-# => "abc123..." (copy this token)
-```
+### Getting an API Key
+
+1. Sign in to Second Breakfast and open **Account** (`/account`)
+2. In the **API Keys** section, give the key a name (e.g. "MCP server") and click **Create key**
+3. Copy the `sb_...` token — it is shown **exactly once** and cannot be retrieved again
+
+Keys can be revoked from the same page at any time.
 
 ## Usage with Claude Desktop
 
@@ -144,7 +145,7 @@ already have a similar one, and only create it if we don't.
 ### "Unauthorized" error
 
 - Check that `API_TOKEN` is set correctly
-- Verify the token is valid: `User.find_by(api_token: "your-token")`
+- Check the key hasn't been revoked on the Account page (`/account`, API Keys section) — if it has, create a new one there
 
 ### Server not connecting
 
