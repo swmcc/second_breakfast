@@ -12,6 +12,14 @@ Rails.application.routes.draw do
       end
       resources :categories, only: [ :index, :show ]
       resources :baskets, only: [ :index, :create, :destroy ]
+      resources :meal_plans, only: [ :index, :show, :create, :destroy ] do
+        member do
+          post :accept
+          post :reopen
+          get :shopping_list
+        end
+        resources :entries, controller: "meal_plan_entries", only: [ :create, :destroy ]
+      end
     end
   end
 

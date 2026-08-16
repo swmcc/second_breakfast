@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_16_195714) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_16_221136) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -81,6 +81,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_16_195714) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "meal_plan_entries", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "day_of_week", null: false
+    t.bigint "meal_plan_id", null: false
+    t.bigint "recipe_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["meal_plan_id", "recipe_id", "day_of_week"], name: "index_meal_plan_entries_uniqueness", unique: true
+    t.index ["meal_plan_id"], name: "index_meal_plan_entries_on_meal_plan_id"
+    t.index ["recipe_id"], name: "index_meal_plan_entries_on_recipe_id"
+  end
+
+  create_table "meal_plans", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.date "week_start_date", null: false
+    t.index ["user_id", "week_start_date"], name: "index_meal_plans_on_user_id_and_week_start_date", unique: true
+    t.index ["user_id"], name: "index_meal_plans_on_user_id"
+  end
+
   create_table "recipes", force: :cascade do |t|
     t.integer "category_id", null: false
     t.datetime "created_at", null: false
@@ -109,5 +130,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_16_195714) do
   add_foreign_key "api_keys", "users"
   add_foreign_key "baskets", "recipes"
   add_foreign_key "baskets", "users"
+  add_foreign_key "meal_plan_entries", "meal_plans"
+  add_foreign_key "meal_plan_entries", "recipes"
+  add_foreign_key "meal_plans", "users"
   add_foreign_key "recipes", "categories"
 end

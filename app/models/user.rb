@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :baskets, dependent: :destroy
   has_many :recipes, through: :baskets
   has_many :api_keys, dependent: :destroy
+  has_many :meal_plans, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true
 

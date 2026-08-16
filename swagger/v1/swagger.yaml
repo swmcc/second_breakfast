@@ -188,6 +188,309 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/Error"
+  "/api/v1/meal_plans":
+    get:
+      summary: List meal plans
+      tags:
+      - Meal Plans
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: filter
+        in: query
+        required: false
+        description: 'Filter by timeframe: active or archived'
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: filtered to archived plans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meal_plans:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        week_start_date:
+                          type: string
+                          format: date
+                        week_end_date:
+                          type: string
+                          format: date
+                        status:
+                          type: string
+                          enum:
+                          - draft
+                          - accepted
+                        archived:
+                          type: boolean
+                        editable:
+                          type: boolean
+                        entry_count:
+                          type: integer
+                  meta:
+                    "$ref": "#/components/schemas/Pagination"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+    post:
+      summary: Create a meal plan
+      tags:
+      - Meal Plans
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: defaults to the current week
+        '409':
+          description: week already planned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  meal_plan:
+                    type: object
+        '422':
+          description: past week rejected
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidationErrors"
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                meal_plan:
+                  type: object
+                  properties:
+                    week_start_date:
+                      type: string
+                      format: date
+                      description: Any date in the target week; normalised to Monday.
+                        Defaults to the current week.
+  "/api/v1/meal_plans/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Show a meal plan
+      tags:
+      - Meal Plans
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: meal plan found
+        '404':
+          description: not found or not owned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+    delete:
+      summary: Delete a meal plan
+      tags:
+      - Meal Plans
+      security:
+      - bearer_auth: []
+      responses:
+        '204':
+          description: draft plan deleted
+        '422':
+          description: locked plan cannot be deleted
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidationErrors"
+  "/api/v1/meal_plans/{id}/accept":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Accept a meal plan
+      tags:
+      - Meal Plans
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: plan accepted
+        '422':
+          description: already accepted
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidationErrors"
+  "/api/v1/meal_plans/{id}/reopen":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Reopen an accepted meal plan
+      tags:
+      - Meal Plans
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: plan reopened
+        '422':
+          description: draft plans cannot be reopened
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidationErrors"
+  "/api/v1/meal_plans/{id}/shopping_list":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Aggregated shopping list for a meal plan
+      tags:
+      - Meal Plans
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: shopping list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  week_start_date:
+                    type: string
+                    format: date
+                  ingredients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        quantity:
+                          type: number
+                        unit:
+                          type: string
+                          nullable: true
+  "/api/v1/meal_plans/{meal_plan_id}/entries":
+    parameters:
+    - name: meal_plan_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Add a recipe to a day
+      tags:
+      - Meal Plans
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: entry added
+        '422':
+          description: locked plan rejects entries
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidationErrors"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                entry:
+                  type: object
+                  properties:
+                    recipe_id:
+                      type: integer
+                    day:
+                      type: string
+                      enum:
+                      - monday
+                      - tuesday
+                      - wednesday
+                      - thursday
+                      - friday
+                      - saturday
+                      - sunday
+                  required:
+                  - recipe_id
+                  - day
+  "/api/v1/meal_plans/{meal_plan_id}/entries/{id}":
+    parameters:
+    - name: meal_plan_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    delete:
+      summary: Remove a recipe from a day
+      tags:
+      - Meal Plans
+      security:
+      - bearer_auth: []
+      responses:
+        '204':
+          description: entry removed
+        '422':
+          description: locked plan rejects removal
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidationErrors"
+        '404':
+          description: entry not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
   "/api/v1/recipes":
     get:
       summary: List recipes

@@ -183,6 +183,134 @@ server.tool(
   }
 );
 
+// Meal plan tools.
+// Rules: weeks run Monday-Sunday and one plan exists per week. Only draft
+// plans are editable; accepting locks a plan and reopening is possible until
+// the week ends. Past weeks are read-only archive.
+
+const DAY_ENUM = z.enum(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]);
+
+server.tool(
+  "list_meal_plans",
+  "List the user's weekly meal plans, newest first. Each week runs Monday-Sunday and a user can only have one plan per week.",
+  {
+    filter: z.enum(["active", "archived"]).optional().describe("Optional filter: 'active' for current/future weeks, 'archived' for past weeks"),
+  },
+  async ({ filter }) => {
+    const qs = filter ? `?filter=${filter}` : "";
+    const data = await apiRequest("GET", `/meal_plans${qs}`);
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "get_meal_plan",
+  "Get a meal plan's full Monday-Sunday grid with the recipes planned for each day.",
+  {
+    id: z.number().describe("Meal plan ID (use list_meal_plans to find)"),
+  },
+  async ({ id }) => {
+    const data = await apiRequest("GET", `/meal_plans/${id}`);
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+    };
+  }
+);
+
+server.tool(
+  "create_meal_plan",
+  "Create a meal plan for a week. Defaults to the current week; pass any date inside a future week to plan ahead (it normalises to that week's Monday). Only one plan can exist per week - if one already exists the error includes it. Past weeks cannot be planned.",
+  {
+    week_start_date: z
+      .string()
+      .optional()
+      .describe("Optional date (YYYY-MM-DD) inside the target week. Omit for the current week."),
+  },
+  async ({ week_start_date }) => {
+    const body = { meal_plan: {} };
+    if (week_start_date) body.meal_plan.week_start_date = week_start_date;
+    const data = await apiRequest("POST", "/meal_plans", body);
+    return {
+      content: [{ type: "text", text: `Meal plan created for week beginning ${data.week_start_date}.\n\n${JSON.stringify(data, null, 2)}` }],
+    };
+  }
+);
+
+server.tool(
+  "add_meal_to_plan",
+  "Add a recipe to a day of a draft meal plan. The same recipe cannot be added twice to one day. Fails if the plan is accepted (reopen it first) or archived.",
+  {
+    plan_id: z.number().describe("Meal plan ID"),
+    recipe_id: z.number().describe("Recipe ID (use search_recipes to find)"),
+    day: DAY_ENUM.describe("Day of the week"),
+  },
+  async ({ plan_id, recipe_id, day }) => {
+    const data = await apiRequest("POST", `/meal_plans/${plan_id}/entries`, { entry: { recipe_id, day } });
+    return {
+      content: [{ type: "text", text: `Added "${data.recipe.title}" to ${data.day}.\n\n${JSON.stringify(data, null, 2)}` }],
+    };
+  }
+);
+
+server.tool(
+  "remove_meal_from_plan",
+  "Remove an entry from a draft meal plan (entry_id comes from get_meal_plan). Fails if the plan is accepted (reopen it first) or archived.",
+  {
+    plan_id: z.number().describe("Meal plan ID"),
+    entry_id: z.number().describe("Entry ID to remove"),
+  },
+  async ({ plan_id, entry_id }) => {
+    await apiRequest("DELETE", `/meal_plans/${plan_id}/entries/${entry_id}`);
+    return {
+      content: [{ type: "text", text: `Entry ${entry_id} removed from meal plan ${plan_id}.` }],
+    };
+  }
+);
+
+server.tool(
+  "accept_meal_plan",
+  "Accept a draft meal plan, locking it against changes. It can be reopened until its week ends.",
+  {
+    id: z.number().describe("Meal plan ID"),
+  },
+  async ({ id }) => {
+    const data = await apiRequest("POST", `/meal_plans/${id}/accept`);
+    return {
+      content: [{ type: "text", text: `Meal plan for week beginning ${data.week_start_date} accepted and locked.\n\n${JSON.stringify(data, null, 2)}` }],
+    };
+  }
+);
+
+server.tool(
+  "reopen_meal_plan",
+  "Reopen an accepted meal plan so it can be edited again. Only works while the plan's week has not ended.",
+  {
+    id: z.number().describe("Meal plan ID"),
+  },
+  async ({ id }) => {
+    const data = await apiRequest("POST", `/meal_plans/${id}/reopen`);
+    return {
+      content: [{ type: "text", text: `Meal plan for week beginning ${data.week_start_date} reopened for editing.\n\n${JSON.stringify(data, null, 2)}` }],
+    };
+  }
+);
+
+server.tool(
+  "get_meal_plan_shopping_list",
+  "Get the aggregated shopping list for a meal plan - every ingredient across the week's recipes, summed by name and unit.",
+  {
+    id: z.number().describe("Meal plan ID"),
+  },
+  async ({ id }) => {
+    const data = await apiRequest("GET", `/meal_plans/${id}/shopping_list`);
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+    };
+  }
+);
+
 // Start the server
 async function main() {
   const transport = new StdioServerTransport();
