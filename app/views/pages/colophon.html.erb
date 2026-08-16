@@ -1,0 +1,46 @@
+<% content_for :title, "Colophon | Second Breakfast" %>
+
+<article class="mx-auto max-w-3xl space-y-8 text-gray-700">
+  <header>
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Colophon</h1>
+    <p class="mt-2 text-sm text-gray-500">The technical details behind this site.</p>
+  </header>
+
+  <section class="space-y-3">
+    <h2 class="text-xl font-semibold text-gray-900">Technology Stack</h2>
+    <ul class="list-disc space-y-1 pl-5">
+      <li><strong class="font-medium text-gray-900">Framework:</strong> Rails 8.1 with Hotwire (Turbo + Stimulus)</li>
+      <li><strong class="font-medium text-gray-900">Styling:</strong> Tailwind CSS</li>
+      <li><strong class="font-medium text-gray-900">Database:</strong> PostgreSQL, with Solid Queue, Solid Cache and Solid Cable riding on it &mdash; no Redis</li>
+      <li><strong class="font-medium text-gray-900">Storage:</strong> Active Storage on Amazon S3</li>
+      <li><strong class="font-medium text-gray-900">Hosting:</strong> <a href="https://hatchbox.io" class="font-medium text-indigo-600 hover:text-indigo-500">Hatchbox</a></li>
+    </ul>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-xl font-semibold text-gray-900">Typography</h2>
+    <p>This site uses <a href="https://rsms.me/inter/" class="font-medium text-indigo-600 hover:text-indigo-500">Inter</a>, self-hosted as a variable font so the strict Content Security Policy stays intact.</p>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-xl font-semibold text-gray-900">Features</h2>
+    <ul class="list-disc space-y-1 pl-5">
+      <li>Weekly Monday&ndash;Sunday meal plans with auto-fill</li>
+      <li>Recipe import from photos via a bundled MCP server for Claude</li>
+      <li>Automatic recipe images via the Pexels API</li>
+      <li>Aggregated shopping lists with print and copy</li>
+      <li>A documented JSON API with revocable keys</li>
+      <li>Public syndication of the current week's plan</li>
+    </ul>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-xl font-semibold text-gray-900">Privacy</h2>
+    <p>No tracking, no analytics, no third-party requests. A strict Content Security Policy and full API authentication.</p>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-xl font-semibold text-gray-900">Source Code</h2>
+    <p>This project is open source and available on <a href="https://github.com/swmcc/second_breakfast" class="font-medium text-indigo-600 hover:text-indigo-500">GitHub</a>.</p>
+  </section>
+</article>

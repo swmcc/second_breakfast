@@ -36,6 +36,8 @@ Rails.application.routes.draw do
 
   get "privacy", to: "pages#privacy"
   get "terms", to: "pages#terms"
+  get "about", to: "pages#about"
+  get "colophon", to: "pages#colophon"
   get "account", to: "users#show", as: :account
   get "account/export", to: "users#export", as: :account_export
   delete "account", to: "users#destroy"
