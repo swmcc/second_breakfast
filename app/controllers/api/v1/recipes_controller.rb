@@ -3,7 +3,6 @@
 module Api
   module V1
     class RecipesController < BaseController
-      before_action :authenticate_api_token!, only: [ :create, :update, :destroy ]
       before_action :set_recipe, only: [ :show, :update, :destroy ]
 
       def index

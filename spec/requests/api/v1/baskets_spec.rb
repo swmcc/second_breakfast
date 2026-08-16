@@ -3,8 +3,9 @@
 require "swagger_helper"
 
 RSpec.describe "Api::V1::Baskets", type: :request do
-  let(:user) { create(:user, :with_api_token) }
-  let(:Authorization) { "Bearer #{user.api_token}" }
+  let(:api_key) { create(:api_key) }
+  let(:user) { api_key.user }
+  let(:Authorization) { "Bearer #{api_key.token}" }
 
   path "/api/v1/baskets" do
     get "List basket items" do

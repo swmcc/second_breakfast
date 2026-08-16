@@ -16,15 +16,14 @@ RSpec.configure do |config|
 
           ## Authentication
 
-          Some endpoints require authentication via Bearer token. To get a token:
+          **All endpoints require authentication** via a Bearer API key.
 
-          ```ruby
-          # In Rails console (bin/rails console)
-          user = User.find_by(email: "your@email.com")
-          user.generate_api_token!
-          ```
+          Create a key on the [Account page](/account) (API Keys section): give it a
+          name, click **Create key**, and copy the `sb_...` token — it is shown
+          exactly once and cannot be retrieved again. Keys can be revoked from the
+          same page at any time.
 
-          Click the **Authorize** button above and enter your token (without "Bearer" prefix).
+          Click the **Authorize** button above and enter your key (without "Bearer" prefix).
         DESC
       },
       paths: {},

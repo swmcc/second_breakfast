@@ -3,10 +3,14 @@
 require "swagger_helper"
 
 RSpec.describe "Api::V1::Recipes", type: :request do
+  let(:api_key) { create(:api_key) }
+  let(:Authorization) { "Bearer #{api_key.token}" }
+
   path "/api/v1/recipes" do
     get "List recipes" do
       tags "Recipes"
       produces "application/json"
+      security [ bearer_auth: [] ]
       parameter name: :page, in: :query, type: :integer, required: false, description: "Page number"
       parameter name: :limit, in: :query, type: :integer, required: false, description: "Items per page"
 
@@ -18,6 +22,14 @@ RSpec.describe "Api::V1::Recipes", type: :request do
                }
 
         before { create_list(:recipe, 3) }
+
+        run_test!
+      end
+
+      response "401", "unauthorized" do
+        schema "$ref" => "#/components/schemas/Error"
+
+        let(:Authorization) { "Bearer invalid" }
 
         run_test!
       end
@@ -58,8 +70,6 @@ RSpec.describe "Api::V1::Recipes", type: :request do
         }
       }
 
-      let(:user) { create(:user, :with_api_token) }
-      let(:Authorization) { "Bearer #{user.api_token}" }
       let(:category) { create(:category) }
 
       response "201", "recipe created" do
@@ -111,6 +121,7 @@ RSpec.describe "Api::V1::Recipes", type: :request do
     get "Search recipes" do
       tags "Recipes"
       produces "application/json"
+      security [ bearer_auth: [] ]
       parameter name: :query, in: :query, type: :string, required: true, description: "Search query"
       parameter name: :page, in: :query, type: :integer, required: false
 
@@ -135,6 +146,15 @@ RSpec.describe "Api::V1::Recipes", type: :request do
           expect(response.parsed_body.fetch("recipes")).to be_empty
         end
       end
+
+      response "401", "unauthorized" do
+        schema "$ref" => "#/components/schemas/Error"
+
+        let(:Authorization) { "Bearer invalid" }
+        let(:query) { "chicken" }
+
+        run_test!
+      end
     end
   end
 
@@ -144,6 +164,7 @@ RSpec.describe "Api::V1::Recipes", type: :request do
     get "Show a recipe" do
       tags "Recipes"
       produces "application/json"
+      security [ bearer_auth: [] ]
 
       response "200", "recipe found" do
         schema "$ref" => "#/components/schemas/Recipe"
@@ -157,6 +178,15 @@ RSpec.describe "Api::V1::Recipes", type: :request do
         schema "$ref" => "#/components/schemas/Error"
 
         let(:id) { 0 }
+
+        run_test!
+      end
+
+      response "401", "unauthorized" do
+        schema "$ref" => "#/components/schemas/Error"
+
+        let(:Authorization) { "Bearer invalid" }
+        let(:id) { create(:recipe).id }
 
         run_test!
       end
@@ -180,8 +210,6 @@ RSpec.describe "Api::V1::Recipes", type: :request do
         }
       }
 
-      let(:user) { create(:user, :with_api_token) }
-      let(:Authorization) { "Bearer #{user.api_token}" }
       let(:existing_recipe) { create(:recipe) }
       let(:id) { existing_recipe.id }
 
@@ -207,8 +235,6 @@ RSpec.describe "Api::V1::Recipes", type: :request do
       tags "Recipes"
       security [ bearer_auth: [] ]
 
-      let(:user) { create(:user, :with_api_token) }
-      let(:Authorization) { "Bearer #{user.api_token}" }
       let(:id) { create(:recipe).id }
 
       response "204", "recipe deleted" do
