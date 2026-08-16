@@ -26,6 +26,7 @@ Rails.application.routes.draw do
   get "account", to: "users#show", as: :account
   get "account/export", to: "users#export", as: :account_export
   delete "account", to: "users#destroy"
+  resources :api_keys, only: [ :create, :destroy ]
 
   get "pages/random_recipe"
   resources :recipes do
