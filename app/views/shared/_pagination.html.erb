@@ -1,0 +1,46 @@
+<%#
+  Reusable pagination nav.
+
+  Usage: render "shared/pagination", pagy: @pagy
+
+  `pagy` may be nil (e.g. a blank search that never built a relation), in which
+  case nothing is rendered. Links keep the current query string — notably
+  `query` on the search page — so paging never drops the user's filters.
+%>
+<% pagy = local_assigns[:pagy] %>
+<% if pagy.present? && pagy.pages > 1 %>
+  <% page_url = ->(page) { url_for(request.query_parameters.merge("page" => page)) } %>
+  <% edge_classes = "inline-flex items-center rounded-md px-3.5 py-2.5 text-sm font-medium" %>
+
+  <nav class="mt-10 flex items-center justify-between border-t border-gray-200 pt-6" aria-label="Pagination">
+    <div class="flex w-0 flex-1">
+      <% if pagy.prev %>
+        <%= link_to "← Previous", page_url.call(pagy.prev), rel: "prev", class: "#{edge_classes} text-gray-700 hover:bg-gray-50" %>
+      <% else %>
+        <span class="<%= edge_classes %> text-gray-300" aria-disabled="true">← Previous</span>
+      <% end %>
+    </div>
+
+    <div class="hidden md:flex md:items-center md:gap-x-1">
+      <% pagy.series.each do |item| %>
+        <% if item == :gap %>
+          <span class="px-3.5 py-2.5 text-sm font-medium text-gray-400">…</span>
+        <% elsif item.is_a?(String) %>
+          <span aria-current="page" class="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white"><%= item %></span>
+        <% else %>
+          <%= link_to item, page_url.call(item), class: "rounded-md px-3.5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50", aria: { label: "Page #{item}" } %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <p class="text-sm text-gray-500 md:hidden">Page <%= pagy.page %> of <%= pagy.pages %></p>
+
+    <div class="flex w-0 flex-1 justify-end">
+      <% if pagy.next %>
+        <%= link_to "Next →", page_url.call(pagy.next), rel: "next", class: "#{edge_classes} text-gray-700 hover:bg-gray-50" %>
+      <% else %>
+        <span class="<%= edge_classes %> text-gray-300" aria-disabled="true">Next →</span>
+      <% end %>
+    </div>
+  </nav>
+<% end %>

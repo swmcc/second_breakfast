@@ -36,7 +36,7 @@ module Api
           current_page: pagy.page,
           total_pages: pagy.pages,
           total_count: pagy.count,
-          per_page: pagy.vars[:limit]
+          per_page: pagy.limit
         }
       end
 

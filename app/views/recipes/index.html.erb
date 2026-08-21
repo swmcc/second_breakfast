@@ -15,8 +15,18 @@
 
   <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
     <% if @recipes.any? %>
+      <%# Russian doll caching.
+          Outer key: the collection's COUNT + MAX(updated_at) (Rails'
+          cache_key_with_version) plus current_user, because each card carries a
+          per-user "Plan"/"Planned" state. Basket touches the user, so toggling a
+          recipe moves the user's cache version and busts this fragment.
+          The categories collection version is folded in too, because the card
+          prints the category name and a rename does not touch the recipe.
+          Inner key: the recipe itself plus its category. %>
+      <% cache [ collection_cache_key("recipes/index", @recipes, Category.all), current_user ] do %>
           <% @recipes.each do |recipe| %>
   <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
+    <% cache [ "recipes/index/card", recipe, recipe.category ] do %>
     <div class="flex flex-1 flex-col p-8">
       <h3 class="mt-6 text-sm font-medium text-gray-900"><%= recipe.title %></h3>
       <dl class="mt-1 flex grow flex-col justify-between">
@@ -26,6 +36,7 @@
         </dd>
       </dl>
     </div>
+    <% end %>
     <div>
       <div class="-mt-px flex divide-x divide-gray-200">
         <div class="flex w-0 flex-1">
@@ -50,11 +61,15 @@
       </div>
     </div>
   </li>
-        <% end %>
+          <% end %>
+      <% end %>
 
 </ul>
     <% else %>
       <p class="text-center my-10">No recipes found.</p>
     <% end %>
 
+  </div>
+
+  <%= render "shared/pagination", pagy: @pagy %>
 </div>

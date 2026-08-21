@@ -54,7 +54,21 @@ Rails.application.routes.draw do
     collection do
       get "search"
     end
+    member do
+      get "print"
+    end
+
+    # Sharing & social (issue #66)
+    resource :favorite, only: [ :create, :destroy ]
+    resource :rating, only: [ :create, :destroy ]
+    resources :reviews, only: [ :create, :edit, :update, :destroy ]
   end
+
+  # Shareable, non-guessable public recipe links.
+  get "r/:token", to: "shared_recipes#show", as: :shared_recipe
+  get "r/:token/print", to: "shared_recipes#print", as: :print_shared_recipe
+
+  resources :favorites, only: [ :index ]
 
   resources :categories
 
@@ -78,5 +92,6 @@ Rails.application.routes.draw do
 
 
   get "up" => "rails/health#show", as: :rails_health_check
+  get "health" => "health#show", as: :health_check
   root "pages#random_recipe"
 end
