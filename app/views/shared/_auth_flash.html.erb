@@ -1,0 +1,13 @@
+<%# Flash region for the authentication pages. The application layout does not
+    render flash messages, so the auth screens render their own. %>
+<% if flash[:alert].present? %>
+  <div class="mt-6 rounded-md border border-red-200 bg-red-50 p-4" role="alert">
+    <p class="text-sm font-medium text-red-800"><%= flash[:alert] %></p>
+  </div>
+<% end %>
+
+<% if flash[:notice].present? %>
+  <div class="mt-6 rounded-md border border-green-200 bg-green-50 p-4" role="status">
+    <p class="text-sm font-medium text-green-800"><%= flash[:notice] %></p>
+  </div>
+<% end %>

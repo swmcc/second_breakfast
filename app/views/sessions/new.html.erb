@@ -1,4 +1,11 @@
-  <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+<% content_for :title, "Sign in | Second Breakfast" %>
+
+<div class="sm:mx-auto sm:w-full sm:max-w-sm">
+  <h1 class="text-center text-2xl/9 font-bold tracking-tight text-gray-900">Sign in to your account</h1>
+
+  <%= render "shared/auth_flash" %>
+
+  <div class="mt-10">
     <%= form_with(url: session_path, local: true, class: "space-y-6") do |form| %>
       <div>
         <%= form.label :email, "Email address", class: "block text-sm/6 font-medium text-gray-900" %>
@@ -10,10 +17,16 @@
       <div>
         <div class="flex items-center justify-between">
           <%= form.label :password, class: "block text-sm/6 font-medium text-gray-900" %>
+          <%= link_to "Forgot your password?", new_password_reset_path, class: "text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500" %>
         </div>
         <div class="mt-2">
           <%= form.password_field :password, autocomplete: "current-password", required: true, class: "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" %>
         </div>
+      </div>
+
+      <div class="flex items-center gap-x-2">
+        <%= form.check_box :remember_me, class: "size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" %>
+        <%= form.label :remember_me, "Remember me on this device", class: "block text-sm/6 text-gray-900" %>
       </div>
 
       <div>
@@ -21,5 +34,9 @@
       </div>
     <% end %>
 
+    <p class="mt-10 text-center text-sm/6 text-gray-500">
+      No account yet?
+      <%= link_to "Sign up", new_user_path, class: "font-semibold text-indigo-600 hover:text-indigo-500" %>
+    </p>
   </div>
 </div>
