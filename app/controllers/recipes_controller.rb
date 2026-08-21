@@ -63,20 +63,26 @@ class RecipesController < ApplicationController
   end
 
   def search
-    if params[:query].present?
-      query = "%#{ActiveRecord::Base.sanitize_sql_like(params[:query])}%"
+    @query = params[:query].to_s.strip
+    @ingredient = params[:ingredient].to_s.strip
+    @selected_category_ids = params[:category_ids].is_a?(Array) ? params[:category_ids].map(&:to_s) : []
+    @sort = Recipe::SORT_OPTIONS.include?(params[:sort].to_s) ? params[:sort].to_s : nil
+    @categories = Category.order(:name)
+    @searched = @query.present? || @ingredient.present? || @selected_category_ids.any?
 
-      if ActiveRecord::Base.connection.adapter_name.downcase.include?("postgresql")
-        @recipes = Recipe.where("LOWER(title) LIKE LOWER(?) OR LOWER(ingredients::text) LIKE LOWER(?)", query, query)
-      else
-        @recipes = Recipe.where("LOWER(title) LIKE LOWER(?) OR LOWER(json_extract(ingredients, '$')) LIKE LOWER(?)", query, query)
-      end
-
-      @pagy, @recipes = paginate_recipes(@recipes)
+    if @searched
+      @pagy, @recipes = paginate_recipes(
+        Recipe.search(
+          @query,
+          category_ids: @selected_category_ids,
+          ingredient: @ingredient,
+          sort: @sort
+        )
+      )
     else
-      # No query: nothing to paginate (an Array has no Pagy).
+      # No search terms: nothing to paginate.
       @pagy = nil
-      @recipes = []
+      @recipes = Recipe.none
     end
   end
 
