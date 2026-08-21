@@ -1,10 +1,14 @@
 class RecipesController < ApplicationController
+  # Included here rather than in ApplicationController: only the recipe list
+  # and search need a paginated backend.
+  include Pagy::Backend
+
   before_action :authenticate_user!, only: [ :new, :create, :edit, :update, :destroy ]
   before_action :set_recipe, only: %i[ show edit update destroy ]
 
   # GET /recipes or /recipes.json
   def index
-    @recipes = Recipe.all
+    @pagy, @recipes = paginate_recipes(Recipe.all)
   end
 
   # GET /recipes/1 or /recipes/1.json
@@ -67,12 +71,26 @@ class RecipesController < ApplicationController
       else
         @recipes = Recipe.where("LOWER(title) LIKE LOWER(?) OR LOWER(json_extract(ingredients, '$')) LIKE LOWER(?)", query, query)
       end
+
+      @pagy, @recipes = paginate_recipes(@recipes)
     else
+      # No query: nothing to paginate (an Array has no Pagy).
+      @pagy = nil
       @recipes = []
     end
   end
 
   private
+    # Shared pagination for the recipe list and search results: preloads the
+    # category to avoid an N+1 on the cards and applies a deterministic order
+    # so page boundaries are stable.
+    def paginate_recipes(scope)
+      pagy(
+        scope.includes(:category).order(created_at: :desc, id: :desc),
+        limit: Rails.application.config.x.recipes_per_page
+      )
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_recipe
       @recipe = Recipe.find(params.expect(:id))

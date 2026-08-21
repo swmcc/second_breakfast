@@ -58,4 +58,6 @@
       <p>No results found for "<%= params[:query] %>". Try searching with different keywords.</p>
     </div>
   <% end %>
+
+  <%= render "shared/pagination", pagy: @pagy %>
 <% end %>
