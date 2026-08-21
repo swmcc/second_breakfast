@@ -50,7 +50,39 @@ jobs:
         env:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/second_breakfast_test
+          # CI is already set by GitHub; naming it here documents that SimpleCov
+          # enforces its minimum coverage threshold on this run (see .simplecov).
+          CI: "true"
         run: bundle exec rspec --format progress
+
+      - name: Summarise code coverage
+        if: always()
+        run: |
+          if [ ! -f coverage/.last_run.json ]; then
+            echo "No coverage report was produced." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          COVERED=$(ruby -rjson -e 'puts JSON.parse(File.read("coverage/.last_run.json")).dig("result", "line")')
+          echo "Line coverage: ${COVERED}%"
+          {
+            echo "## Code coverage"
+            echo ""
+            echo "| Metric | Value |"
+            echo "| --- | --- |"
+            echo "| Line coverage | ${COVERED}% |"
+            echo "| Minimum required | 90% |"
+            echo ""
+            echo "Full HTML report is attached to this run as the \`coverage-report\` artifact."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: warn
 
   scan_ruby:
     runs-on: ubuntu-latest

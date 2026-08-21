@@ -1,3 +1,12 @@
+# Base Kamal configuration. Per-environment overrides live in
+# config/deploy.staging.yml and config/deploy.production.yml and are selected
+# with `bin/kamal deploy -d staging|production` (see docs/deployment.md).
+#
+# Database migrations: bin/docker-entrypoint runs `bin/rails db:prepare` every
+# time a web container boots, so migrations are applied automatically as part of
+# every deploy. The deploy workflow additionally runs `bin/rails db:migrate`
+# through `kamal app exec` so failures surface in the job log.
+
 # Name of your application. Used to uniquely configure containers.
 service: second_breakfast
 
