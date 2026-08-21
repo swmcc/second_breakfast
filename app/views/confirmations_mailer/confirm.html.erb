@@ -1,0 +1,13 @@
+<p>Welcome to Second Breakfast!</p>
+
+<p>
+  Please confirm that <strong><%= @user.email %></strong> is your email address:
+</p>
+
+<p>
+  <%= link_to "Confirm my email address", email_confirmation_url(token: @token) %>
+</p>
+
+<p>This link expires in <%= @expires_in %>. You can request a new one from your account page at any time.</p>
+
+<p>If you didn't create a Second Breakfast account, you can safely ignore this email.</p>

@@ -68,9 +68,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_120000) do
 
   create_table "baskets", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.integer "recipe_id", null: false
+    t.bigint "recipe_id", null: false
     t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
+    t.bigint "user_id", null: false
     t.index ["recipe_id"], name: "index_baskets_on_recipe_id"
     t.index ["user_id", "recipe_id"], name: "index_baskets_on_user_id_and_recipe_id", unique: true
     t.index ["user_id"], name: "index_baskets_on_user_id"
@@ -126,7 +126,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_120000) do
   end
 
   create_table "recipes", force: :cascade do |t|
-    t.integer "category_id", null: false
+    t.bigint "category_id", null: false
     t.datetime "created_at", null: false
     t.text "description"
     t.json "ingredients"
@@ -162,11 +162,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_120000) do
 
   create_table "users", force: :cascade do |t|
     t.string "api_token"
+    t.datetime "confirmed_at"
     t.datetime "created_at", null: false
     t.string "email"
+    t.integer "failed_attempts", default: 0, null: false
+    t.datetime "locked_until"
     t.string "password_digest"
+    t.string "remember_token"
     t.datetime "updated_at", null: false
     t.index ["api_token"], name: "index_users_on_api_token", unique: true
+    t.index ["remember_token"], name: "index_users_on_remember_token", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

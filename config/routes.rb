@@ -34,6 +34,12 @@ Rails.application.routes.draw do
   get "sign_in", to: "sessions#new"
   delete "sign_out", to: "sessions#destroy", as: :sign_out
 
+  # Password reset and email confirmation (issue #64).
+  resources :password_resets, only: [ :new, :create, :edit, :update ], param: :token
+  get "forgot_password", to: "password_resets#new", as: :forgot_password
+  post "email_confirmation/resend", to: "email_confirmations#create", as: :resend_email_confirmation
+  get "email_confirmation/:token", to: "email_confirmations#show", as: :email_confirmation
+
   get "privacy", to: "pages#privacy"
   get "terms", to: "pages#terms"
   get "about", to: "pages#about"
