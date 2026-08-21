@@ -1,0 +1,22 @@
+# Staging destination -- deployed with `bin/kamal deploy -d staging`.
+# Merged on top of config/deploy.yml.
+#
+# TODO(owner): replace the placeholder host and domain below with the real
+# staging server before the first deploy. Everything else is inherited.
+
+# Container/service name, kept distinct from production so the two can never
+# collide (even if they ever share a host).
+service: second_breakfast_staging
+
+servers:
+  web:
+    - 192.168.0.1
+
+proxy:
+  ssl: true
+  host: staging.example.com
+
+env:
+  clear:
+    SOLID_QUEUE_IN_PUMA: true
+    RAILS_LOG_LEVEL: info
