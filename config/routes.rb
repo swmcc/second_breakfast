@@ -34,6 +34,12 @@ Rails.application.routes.draw do
   get "sign_in", to: "sessions#new"
   delete "sign_out", to: "sessions#destroy", as: :sign_out
 
+  # Password reset and email confirmation (issue #64).
+  resources :password_resets, only: [ :new, :create, :edit, :update ], param: :token
+  get "forgot_password", to: "password_resets#new", as: :forgot_password
+  post "email_confirmation/resend", to: "email_confirmations#create", as: :resend_email_confirmation
+  get "email_confirmation/:token", to: "email_confirmations#show", as: :email_confirmation
+
   get "privacy", to: "pages#privacy"
   get "terms", to: "pages#terms"
   get "about", to: "pages#about"
@@ -48,7 +54,21 @@ Rails.application.routes.draw do
     collection do
       get "search"
     end
+    member do
+      get "print"
+    end
+
+    # Sharing & social (issue #66)
+    resource :favorite, only: [ :create, :destroy ]
+    resource :rating, only: [ :create, :destroy ]
+    resources :reviews, only: [ :create, :edit, :update, :destroy ]
   end
+
+  # Shareable, non-guessable public recipe links.
+  get "r/:token", to: "shared_recipes#show", as: :shared_recipe
+  get "r/:token/print", to: "shared_recipes#print", as: :print_shared_recipe
+
+  resources :favorites, only: [ :index ]
 
   resources :categories
 
@@ -72,5 +92,6 @@ Rails.application.routes.draw do
 
 
   get "up" => "rails/health#show", as: :rails_health_check
+  get "health" => "health#show", as: :health_check
   root "pages#random_recipe"
 end

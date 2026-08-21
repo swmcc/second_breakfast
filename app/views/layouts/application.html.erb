@@ -31,8 +31,11 @@
            aria-label="Main">
         <div class="flex flex-1 items-center">
           <div class="hidden lg:flex lg:gap-x-8">
-            <%= link_to "Recipes", recipes_path, class: "inline-flex min-h-11 items-center rounded-md px-1 text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline" %>
-            <%= link_to "Categories", categories_path, class: "inline-flex min-h-11 items-center rounded-md px-1 text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline" %>
+            <%# Static nav chrome only - nothing auth dependent lives inside. %>
+            <% cache "nav/primary-links" do %>
+              <%= link_to "Recipes", recipes_path, class: "inline-flex min-h-11 items-center rounded-md px-1 text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline" %>
+              <%= link_to "Categories", categories_path, class: "inline-flex min-h-11 items-center rounded-md px-1 text-sm font-semibold text-gray-900 hover:text-indigo-700 hover:underline" %>
+            <% end %>
           </div>
           <div class="flex lg:hidden">
             <button type="button"
@@ -76,7 +79,13 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
                 </svg>
-                <span class="text-sm font-medium"><%= pluralize(current_user.baskets.count, 'Saved Recipe') %></span>
+                <%# Per-user fragment. The key is built from current_user, so it carries
+                    the user id and updated_at; Basket touches the user, so adding or
+                    removing a recipe busts it. A signed-out visitor never reaches this
+                    branch, and could not read another user's key if they did. %>
+                <% cache [ current_user, "nav/basket-count" ] do %>
+                  <span class="text-sm font-medium"><%= pluralize(current_user.baskets.count, 'Saved Recipe') %></span>
+                <% end %>
               <% end %>
 
               <%# User dropdown menu %>
@@ -157,8 +166,10 @@
 
           <nav class="mt-4" aria-label="Mobile">
             <ul role="list" class="space-y-1">
-              <li><%= link_to "Recipes", recipes_path, class: "flex min-h-11 items-center rounded-lg px-3 text-base font-semibold text-gray-900 hover:bg-gray-100" %></li>
-              <li><%= link_to "Categories", categories_path, class: "flex min-h-11 items-center rounded-lg px-3 text-base font-semibold text-gray-900 hover:bg-gray-100" %></li>
+              <% cache "nav/mobile-links" do %>
+                <li><%= link_to "Recipes", recipes_path, class: "flex min-h-11 items-center rounded-lg px-3 text-base font-semibold text-gray-900 hover:bg-gray-100" %></li>
+                <li><%= link_to "Categories", categories_path, class: "flex min-h-11 items-center rounded-lg px-3 text-base font-semibold text-gray-900 hover:bg-gray-100" %></li>
+              <% end %>
               <% if user_signed_in? %>
                 <li><%= link_to "Meal Plan", meal_plans_path, class: "flex min-h-11 items-center rounded-lg px-3 text-base font-semibold text-gray-900 hover:bg-gray-100" %></li>
                 <li><%= link_to "Saved Recipes", meals_path, class: "flex min-h-11 items-center rounded-lg px-3 text-base font-semibold text-gray-900 hover:bg-gray-100" %></li>
@@ -182,10 +193,12 @@
     <footer class="bg-white">
       <div class="mx-auto mt-8 max-w-7xl border-t border-gray-900/10 px-4 py-8 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
         <nav class="flex flex-wrap gap-x-6 md:order-2" aria-label="Footer">
-          <%= link_to "About", about_path, class: "inline-flex min-h-11 items-center text-sm text-gray-600 hover:text-gray-900 hover:underline" %>
-          <%= link_to "Colophon", colophon_path, class: "inline-flex min-h-11 items-center text-sm text-gray-600 hover:text-gray-900 hover:underline" %>
-          <%= link_to "Privacy", privacy_path, class: "inline-flex min-h-11 items-center text-sm text-gray-600 hover:text-gray-900 hover:underline" %>
-          <%= link_to "Terms", terms_path, class: "inline-flex min-h-11 items-center text-sm text-gray-600 hover:text-gray-900 hover:underline" %>
+          <% cache "nav/footer-links" do %>
+            <%= link_to "About", about_path, class: "inline-flex min-h-11 items-center text-sm text-gray-600 hover:text-gray-900 hover:underline" %>
+            <%= link_to "Colophon", colophon_path, class: "inline-flex min-h-11 items-center text-sm text-gray-600 hover:text-gray-900 hover:underline" %>
+            <%= link_to "Privacy", privacy_path, class: "inline-flex min-h-11 items-center text-sm text-gray-600 hover:text-gray-900 hover:underline" %>
+            <%= link_to "Terms", terms_path, class: "inline-flex min-h-11 items-center text-sm text-gray-600 hover:text-gray-900 hover:underline" %>
+          <% end %>
         </nav>
         <p class="mt-4 text-sm text-gray-600 md:order-1 md:mt-0">Built with <span aria-hidden="true">&#10084;&#65039;</span><span class="sr-only">love</span> by <%= link_to "swmcc", "https://swm.cc", class: "font-medium text-gray-900 hover:text-indigo-700 hover:underline" %></p>
       </div>

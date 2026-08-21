@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Second Breakfast" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+
+    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <%# Deliberately no nav, search bar or footer: this layout exists so a recipe
+      prints on paper without the app's chrome. %>
+  <body class="bg-gray-50 print:bg-white">
+    <main class="mx-auto max-w-3xl px-6 py-10 print:max-w-none print:px-0 print:py-0">
+      <%= yield %>
+    </main>
+  </body>
+</html>

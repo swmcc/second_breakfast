@@ -2,6 +2,9 @@
 
 <section class="mx-auto w-full max-w-sm">
   <h1 class="text-2xl font-bold tracking-tight text-gray-900">Sign up</h1>
+  <p class="mt-2 text-sm/6 text-gray-500">
+    We'll email you a link to confirm your address.
+  </p>
 
   <div class="mt-8">
     <%= render "shared/error_summary", object: @user, noun: "user" %>
@@ -21,9 +24,11 @@
         <%= form.label :password, class: "block text-sm/6 font-medium text-gray-900" %>
         <div class="mt-2">
           <%= form.password_field :password, autocomplete: "new-password", required: true,
+                minlength: User::MINIMUM_PASSWORD_LENGTH,
                 class: "block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline outline-1 -outline-offset-1 sm:text-sm/6 #{@user.errors.include?(:password) ? 'outline-red-700' : 'outline-gray-400'}",
                 **field_error_attributes(@user, :password) %>
         </div>
+        <p class="mt-1 text-xs text-gray-600">At least <%= User::MINIMUM_PASSWORD_LENGTH %> characters.</p>
         <%= render "shared/field_error", object: @user, attribute: :password %>
       </div>
 
@@ -31,6 +36,7 @@
         <%= form.label :password_confirmation, "Confirm password", class: "block text-sm/6 font-medium text-gray-900" %>
         <div class="mt-2">
           <%= form.password_field :password_confirmation, autocomplete: "new-password", required: true,
+                minlength: User::MINIMUM_PASSWORD_LENGTH,
                 class: "block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline outline-1 -outline-offset-1 sm:text-sm/6 #{@user.errors.include?(:password_confirmation) ? 'outline-red-700' : 'outline-gray-400'}",
                 **field_error_attributes(@user, :password_confirmation) %>
         </div>
@@ -39,5 +45,10 @@
 
       <%= form.submit "Sign Up", class: "flex min-h-11 w-full cursor-pointer justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-700" %>
     <% end %>
+
+    <p class="mt-10 text-center text-sm/6 text-gray-500">
+      Already have an account?
+      <%= link_to "Sign in", sign_in_path, class: "font-semibold text-indigo-600 hover:text-indigo-500" %>
+    </p>
   </div>
 </section>

@@ -1,3 +1,12 @@
+# Base Kamal configuration. Per-environment overrides live in
+# config/deploy.staging.yml and config/deploy.production.yml and are selected
+# with `bin/kamal deploy -d staging|production` (see docs/deployment.md).
+#
+# Database migrations: bin/docker-entrypoint runs `bin/rails db:prepare` every
+# time a web container boots, so migrations are applied automatically as part of
+# every deploy. The deploy workflow additionally runs `bin/rails db:migrate`
+# through `kamal app exec` so failures surface in the job log.
+
 # Name of your application. Used to uniquely configure containers.
 service: second_breakfast
 
@@ -35,6 +44,11 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
+
+    # Sentry error tracking + performance tracing. Add the DSN to
+    # .kamal/secrets (from your password manager) to switch it on; with no
+    # SENTRY_DSN the app simply never initialises Sentry.
+    - SENTRY_DSN
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
@@ -52,6 +66,24 @@ env:
 
     # Log everything from Rails
     # RAILS_LOG_LEVEL: debug
+
+    # --- Observability (see config/initializers/observability.rb) ---
+    # Line-delimited JSON on STDOUT is the production default; set to "text"
+    # for human-readable logs.
+    # RAILS_LOG_FORMAT: json
+
+    # Attach the log/metric subscribers. On by default in production.
+    # OBSERVABILITY_ENABLED: true
+
+    # Warn about requests/queries slower than these (milliseconds).
+    # SLOW_REQUEST_MS: 1000
+    # SLOW_QUERY_MS: 500
+
+    # Sentry performance tracing sample rate (0.0 - 1.0), and the environment
+    # and release reported alongside each event.
+    # SENTRY_TRACES_SAMPLE_RATE: 0.05
+    # SENTRY_ENVIRONMENT: production
+    # SENTRY_RELEASE: <git sha>
 
 # Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
 # "bin/kamal logs -r job" will tail logs from the first server in the job section.

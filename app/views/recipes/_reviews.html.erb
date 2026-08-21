@@ -1,0 +1,35 @@
+<% reviews = recipe.reviews.includes(:user).newest_first %>
+
+<section class="rounded-lg bg-white shadow p-6" aria-labelledby="reviews-heading">
+  <h3 id="reviews-heading" class="text-xl font-semibold text-gray-900">
+    <%= pluralize(reviews.size, "Review") %>
+  </h3>
+
+  <% if reviews.any? %>
+    <ul class="mt-4 space-y-4" id="reviews">
+      <%= render partial: "recipes/review", collection: reviews, as: :review, locals: { recipe: recipe } %>
+    </ul>
+  <% else %>
+    <p class="mt-4 text-sm text-gray-500">No reviews yet.</p>
+  <% end %>
+
+  <% if signed_in? %>
+    <div class="mt-6 print:hidden">
+      <h4 class="text-base font-semibold text-gray-900">Write a review</h4>
+      <%= form_with url: recipe_reviews_path(recipe), method: :post, scope: :review, class: "mt-2" do |form| %>
+        <%= form.text_area :body,
+              rows: 4,
+              maxlength: Review::MAX_BODY_LENGTH,
+              placeholder: "How did it turn out?",
+              class: "block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+        <%= form.submit "Post review",
+              class: "mt-3 rounded-md px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm cursor-pointer" %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="mt-4 text-sm text-gray-500 print:hidden">
+      <%= link_to "Sign in", sign_in_path, class: "text-indigo-600 hover:text-indigo-500 underline" %>
+      to leave a review.
+    </p>
+  <% end %>
+</section>

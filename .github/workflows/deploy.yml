@@ -1,0 +1,112 @@
+name: Deploy
+
+# Staging deploys automatically once CI passes on main; production deploys are
+# manual and gated behind the `production` GitHub Environment (which is where
+# the required-reviewer approval is configured). See docs/deployment.md.
+
+on:
+  # Fired when the CI workflow finishes on main. Using workflow_run rather than
+  # a plain `push` trigger is what gates the staging deploy on CI passing.
+  workflow_run:
+    workflows: [ "CI" ]
+    types: [ completed ]
+    branches: [ main ]
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which environment to act on.
+        required: true
+        default: production
+        type: choice
+        options:
+          - production
+          - staging
+      ref:
+        description: Branch, tag or SHA to deploy. Ignored when rolling back.
+        required: false
+        default: main
+        type: string
+      rollback_version:
+        description: "Leave blank to deploy. To roll back, enter an existing Kamal version (the commit SHA of a previous deploy, from `kamal app containers`)."
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Staging: automatic, on every green CI run on main.
+  # ---------------------------------------------------------------------------
+  staging:
+    name: Staging
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success'
+    uses: ./.github/workflows/kamal.yml
+    with:
+      environment: staging
+      destination: staging
+      ref: ${{ github.event.workflow_run.head_sha }}
+      action: deploy
+    # `inherit` is required for Environment-scoped secrets to resolve inside the
+    # called workflow's job, which is the job that declares the environment.
+    secrets: inherit
+
+  # ---------------------------------------------------------------------------
+  # Manual runs: resolve the ref and refuse to deploy a commit CI has not passed.
+  # ---------------------------------------------------------------------------
+  verify:
+    name: Verify CI passed
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REF: ${{ inputs.ref }}
+      ROLLBACK_VERSION: ${{ inputs.rollback_version }}
+    steps:
+      - name: Resolve ref to a commit SHA
+        id: resolve
+        run: |
+          REF="${REF:-main}"
+          SHA=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${REF}" --jq '.sha')
+          if [ -z "$SHA" ]; then
+            echo "::error::Could not resolve '${REF}' to a commit."
+            exit 1
+          fi
+          echo "Resolved ${REF} to ${SHA}"
+          echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Require a successful CI run for that commit
+        run: |
+          if [ -n "$ROLLBACK_VERSION" ]; then
+            echo "Rolling back to ${ROLLBACK_VERSION}; that image was already built and tested. Skipping the CI check."
+            exit 0
+          fi
+          SHA="${{ steps.resolve.outputs.sha }}"
+          SUCCESSES=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/ci.yml/runs?head_sha=${SHA}&per_page=50" \
+            --jq '[.workflow_runs[] | select(.conclusion == "success")] | length')
+          if [ "$SUCCESSES" -eq 0 ]; then
+            echo "::error::No successful CI run found for ${SHA}. Refusing to deploy."
+            exit 1
+          fi
+          echo "Found ${SUCCESSES} successful CI run(s) for ${SHA}."
+
+  manual:
+    name: Manual
+    needs: verify
+    if: github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/kamal.yml
+    with:
+      environment: ${{ inputs.environment }}
+      destination: ${{ inputs.environment }}
+      ref: ${{ needs.verify.outputs.sha }}
+      action: ${{ inputs.rollback_version == '' && 'deploy' || 'rollback' }}
+      version: ${{ inputs.rollback_version }}
+    secrets: inherit

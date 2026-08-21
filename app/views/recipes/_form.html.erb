@@ -10,8 +10,16 @@
 
   <div class="my-5">
   <%= form.label :category_id, "Category", class: "block text-sm font-medium text-gray-900" %>
-  <%= form.collection_select :category_id, Category.all, :id, :name, { prompt: "Select a category" }, { class: "block shadow rounded-md border px-3 py-2 mt-2 w-full #{field_border_classes(recipe, :category)}", **field_error_attributes(recipe, :category) } %>
+  <%= form.collection_select :category_id, Category.cached_list, :id, :name, { prompt: "Select a category" }, { class: "block shadow rounded-md border px-3 py-2 mt-2 w-full #{field_border_classes(recipe, :category)}", **field_error_attributes(recipe, :category) } %>
   <%= render "shared/field_error", object: recipe, attribute: :category %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :visibility, "Visibility", class: "block text-sm font-medium text-gray-900" %>
+    <%= form.select :visibility, recipe_visibility_options, {}, class: "block shadow rounded-md border px-3 py-2 mt-2 w-full" %>
+    <p class="mt-1 text-sm text-gray-600">
+      Private recipes are only readable by you &mdash; but anyone you hand the share link to can still read them.
+    </p>
   </div>
 
   <!-- Description Field -->

@@ -5,6 +5,22 @@ class UsersController < ApplicationController
     @user = User.new
   end
 
+  # New accounts start unconfirmed. They are signed in straight away and nothing
+  # is gated on confirmation yet — see the note in the account page — so turning
+  # this on cannot lock anybody out.
+  def create
+    @user = User.new(user_params)
+
+    if @user.save
+      ConfirmationsMailer.confirm(@user).deliver_later
+      reset_session
+      session[:user_id] = @user.id
+      redirect_to root_path, notice: "Welcome to Second Breakfast! Check your email to confirm your address."
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
   def show
     @api_keys = current_user.api_keys.order(created_at: :desc)
   end

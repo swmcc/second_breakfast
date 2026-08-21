@@ -26,7 +26,21 @@ module SecondBreakfast
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    config.autoload_lib(ignore: %w[assets tasks])
+    # `observability` is loaded by hand (below) rather than autoloaded, because
+    # config/environments/production.rb needs the log formatter while the
+    # application is still being configured.
+    config.autoload_lib(ignore: %w[assets tasks observability observability.rb])
+
+    # Observability: JSON logging, request ids, slow request/SQL warnings and
+    # metric log lines. See lib/observability.rb.
+    require_relative "../lib/observability"
+
+    # Carry the request id into Observability::Current so every log line and
+    # Sentry event can be traced back to a single request. Must sit after
+    # ActionDispatch::RequestId (which generates the id) and after
+    # ActionDispatch::Executor (which resets CurrentAttributes) - the default
+    # stack orders Executor first, so inserting after RequestId satisfies both.
+    config.middleware.insert_after ActionDispatch::RequestId, Observability::RequestContext
 
     # Configuration for the application, engines, and railties goes here.
     #

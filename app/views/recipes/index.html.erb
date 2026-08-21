@@ -11,62 +11,76 @@
 
   <div id="recipes" class="mt-8 min-w-full">
     <% if @recipes.any? %>
-      <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <% @recipes.each do |recipe| %>
-          <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow ring-1 ring-gray-900/5 transition-shadow hover:shadow-md">
-            <div class="flex flex-1 flex-col items-center p-6">
-              <% if recipe.image.attached? %>
-                <%= image_tag recipe.image.variant(resize_to_limit: [ 200, 200 ]),
-                      alt: "Photograph of #{recipe.title}",
-                      class: "size-32 flex-shrink-0 rounded-full object-cover" %>
-              <% else %>
-                <div class="flex size-32 flex-shrink-0 items-center justify-center rounded-full bg-gray-100" aria-hidden="true">
-                  <svg class="h-10 w-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                  </svg>
+      <%# Russian doll caching.
+          Outer key: the collection's COUNT + MAX(updated_at) (Rails'
+          cache_key_with_version) plus current_user, because each card carries a
+          per-user "Plan"/"Planned" state. Basket touches the user, so toggling a
+          recipe moves the user's cache version and busts this fragment.
+          The categories collection version is folded in too, because the card
+          prints the category name and a rename does not touch the recipe.
+          Inner key: the recipe itself plus its category. %>
+      <% cache [ collection_cache_key("recipes/index", @recipes, Category.all), current_user ] do %>
+        <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <% @recipes.each do |recipe| %>
+            <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow ring-1 ring-gray-900/5 transition-shadow hover:shadow-md">
+              <% cache [ "recipes/index/card", recipe, recipe.category ] do %>
+                <div class="flex flex-1 flex-col items-center p-6">
+                  <% if recipe.image.attached? %>
+                    <%= image_tag recipe.image.variant(resize_to_limit: [ 200, 200 ]),
+                          alt: "Photograph of #{recipe.title}",
+                          class: "size-32 flex-shrink-0 rounded-full object-cover" %>
+                  <% else %>
+                    <div class="flex size-32 flex-shrink-0 items-center justify-center rounded-full bg-gray-100" aria-hidden="true">
+                      <svg class="h-10 w-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                      </svg>
+                    </div>
+                  <% end %>
+
+                  <h2 class="mt-4 text-base font-semibold text-gray-900"><%= recipe.title %></h2>
+
+                  <p class="mt-1">
+                    <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-700/30"><%= recipe.category.name %></span>
+                  </p>
+
+                  <div class="mt-3 flex justify-center">
+                    <%= render "shared/recipe_meta", recipe: recipe %>
+                  </div>
                 </div>
               <% end %>
 
-              <h2 class="mt-4 text-base font-semibold text-gray-900"><%= recipe.title %></h2>
-
-              <p class="mt-1">
-                <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-700/30"><%= recipe.category.name %></span>
-              </p>
-
-              <div class="mt-3 flex justify-center">
-                <%= render "shared/recipe_meta", recipe: recipe %>
-              </div>
-            </div>
-
-            <div>
-              <div class="-mt-px flex divide-x divide-gray-200">
-                <div class="flex w-0 flex-1">
-                  <%= link_to recipe, class: "relative -mr-px inline-flex min-h-11 w-0 flex-1 items-center justify-center gap-x-2 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 hover:bg-gray-50" do %>
-                    <svg class="size-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
-                      <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                    </svg>
-                    View<span class="sr-only"> <%= recipe.title %></span>
-                  <% end %>
-                </div>
-                <% if signed_in? %>
+              <div>
+                <div class="-mt-px flex divide-x divide-gray-200">
                   <div class="flex w-0 flex-1">
-                    <%= link_to toggle_meal_path(recipe_id: recipe), class: "relative -mr-px inline-flex min-h-11 w-0 flex-1 items-center justify-center gap-x-2 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 hover:bg-gray-50", data: { turbo_method: :post } do %>
-                      <svg class="size-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    <%= link_to recipe, class: "relative -mr-px inline-flex min-h-11 w-0 flex-1 items-center justify-center gap-x-2 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 hover:bg-gray-50" do %>
+                      <svg class="size-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+                        <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
                       </svg>
-                      <%= current_user.in_basket?(recipe) ? "Planned" : "Plan" %>
-                      <span class="sr-only"> <%= recipe.title %></span>
+                      View<span class="sr-only"> <%= recipe.title %></span>
                     <% end %>
                   </div>
-                <% end %>
+                  <% if signed_in? %>
+                    <div class="flex w-0 flex-1">
+                      <%= link_to toggle_meal_path(recipe_id: recipe), class: "relative -mr-px inline-flex min-h-11 w-0 flex-1 items-center justify-center gap-x-2 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 hover:bg-gray-50", data: { turbo_method: :post } do %>
+                        <svg class="size-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                        <%= current_user.in_basket?(recipe) ? "Planned" : "Plan" %>
+                        <span class="sr-only"> <%= recipe.title %></span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
               </div>
-            </div>
-          </li>
-        <% end %>
-      </ul>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
     <% else %>
       <p class="my-10 text-center text-gray-600">No recipes found.</p>
     <% end %>
   </div>
+
+  <%= render "shared/pagination", pagy: @pagy %>
 </div>

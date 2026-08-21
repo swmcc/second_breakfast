@@ -1,0 +1,35 @@
+<% content_for :title, "Choose a new password | Second Breakfast" %>
+<%# The reset token is in the URL, so keep it out of any outbound Referer header. %>
+<% content_for :head do %>
+  <meta name="referrer" content="no-referrer">
+<% end %>
+
+<div class="sm:mx-auto sm:w-full sm:max-w-sm">
+  <h1 class="text-center text-2xl/9 font-bold tracking-tight text-gray-900">Choose a new password</h1>
+  <p class="mt-2 text-center text-sm/6 text-gray-500">
+    At least <%= User::MINIMUM_PASSWORD_LENGTH %> characters. Setting a new password signs you out everywhere else.
+  </p>
+
+
+  <div class="mt-10">
+    <%= form_with(url: password_reset_path(token: params[:token]), method: :patch, local: true, class: "space-y-6") do |form| %>
+      <div>
+        <%= form.label :password, "New password", class: "block text-sm/6 font-medium text-gray-900" %>
+        <div class="mt-2">
+          <%= form.password_field :password, autocomplete: "new-password", required: true, minlength: User::MINIMUM_PASSWORD_LENGTH, class: "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" %>
+        </div>
+      </div>
+
+      <div>
+        <%= form.label :password_confirmation, "Confirm new password", class: "block text-sm/6 font-medium text-gray-900" %>
+        <div class="mt-2">
+          <%= form.password_field :password_confirmation, autocomplete: "new-password", required: true, minlength: User::MINIMUM_PASSWORD_LENGTH, class: "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" %>
+        </div>
+      </div>
+
+      <div>
+        <%= form.submit "Save new password", class: "flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+      </div>
+    <% end %>
+  </div>
+</div>

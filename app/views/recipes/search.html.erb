@@ -1,84 +1,121 @@
-<% content_for :title, "Search results | Second Breakfast" %>
+<% content_for :title, "Search recipes | Second Breakfast" %>
 <% breadcrumbs [ "Recipes", recipes_path ], [ "Search" ] %>
 
 <div class="w-full">
-  <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-    <% if params[:query].present? %>
-      Search results for &ldquo;<%= params[:query] %>&rdquo;
-    <% else %>
-      Search recipes
+  <h1 class="font-bold text-4xl mb-6">Search recipes</h1>
+
+  <%= form_with url: search_recipes_path, method: :get, class: "rounded-lg bg-white shadow p-6 mb-8" do %>
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div>
+        <%= label_tag :query, "Keywords", class: "block text-sm font-medium text-gray-900" %>
+        <%= text_field_tag :query, @query,
+              placeholder: "e.g. fluffy pancakes",
+              class: "mt-2 block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm" %>
+        <p class="mt-1 text-xs text-gray-600">Searches titles, descriptions, ingredients and instructions.</p>
+      </div>
+
+      <div>
+        <%= label_tag :ingredient, "Ingredient", class: "block text-sm font-medium text-gray-900" %>
+        <%= text_field_tag :ingredient, @ingredient,
+              placeholder: "e.g. eggs",
+              class: "mt-2 block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm" %>
+        <p class="mt-1 text-xs text-gray-600">Matches ingredient names only.</p>
+      </div>
+
+      <div>
+        <%= label_tag :sort, "Sort by", class: "block text-sm font-medium text-gray-900" %>
+        <%= select_tag :sort,
+              options_for_select(
+                [ [ "Relevance", "relevance" ], [ "Newest", "newest" ], [ "Alphabetical", "alphabetical" ] ],
+                @sort
+              ),
+              include_blank: "Best match",
+              class: "mt-2 block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm" %>
+      </div>
+    </div>
+
+    <% if @categories.any? %>
+      <fieldset class="mt-6">
+        <legend class="block text-sm font-medium text-gray-900">Categories</legend>
+        <div class="mt-2 flex flex-wrap gap-x-6 gap-y-2">
+          <% @categories.each do |category| %>
+            <label class="flex items-center gap-x-2 text-sm text-gray-700">
+              <%= check_box_tag "category_ids[]", category.id, @selected_category_ids.include?(category.id.to_s),
+                    id: "category_ids_#{category.id}",
+                    class: "size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+              <%= category.name %>
+            </label>
+          <% end %>
+        </div>
+      </fieldset>
     <% end %>
-  </h1>
 
-  <p class="mt-2 text-gray-700" role="status">
-    <% if params[:query].present? %>
-      <%= pluralize(@recipes.size, "recipe") %> found.
-    <% else %>
-      Use the search box above to look for a recipe by name or ingredient.
-    <% end %>
-  </p>
+    <div class="mt-6 flex items-center gap-x-3">
+      <%= submit_tag "Search", class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium cursor-pointer" %>
+      <%= link_to "Reset", search_recipes_path, class: "text-sm font-medium text-gray-600 hover:text-gray-900" %>
+    </div>
+  <% end %>
 
-  <div class="mt-8">
-<% if params[:query].present? %>
-  <% if @recipes.any? %>
-    <div class="mb-8">
-      <ul role="list" class="space-y-6">
-        <% @recipes.each do |recipe| %>
-          <li class="border-b pb-4 flex flex-col gap-4 sm:flex-row sm:items-start">
-            <!-- Thumbnail Image -->
-            <% if recipe.image.attached? %>
-              <%= link_to recipe_path(recipe), class: "flex-shrink-0" do %>
-                <%= image_tag recipe.image.variant(resize_to_fill: [ 150, 150 ]), alt: "Photograph of #{recipe.title}", class: "w-36 h-36 object-cover rounded-md" %>
-              <% end %>
-            <% else %>
-              <div class="w-36 h-36 flex-shrink-0 bg-gray-100 rounded-md" aria-hidden="true"></div>
-            <% end %>
-
-            <!-- Recipe Info (Title, Description, Ingredients) -->
-            <div class="flex-grow">
-              <div>
-                <%= link_to recipe_path(recipe), class: "text-lg font-semibold text-blue-700 hover:underline" do %>
-                  <%= recipe.title %>
+  <% if @searched %>
+    <% if @recipes.any? %>
+      <p class="text-sm text-gray-700 mb-4" role="status"><%= pluralize(@recipes.size, "recipe") %> found.</p>
+      <div class="mb-8">
+        <ul role="list" class="space-y-6">
+          <% @recipes.each do |recipe| %>
+            <li class="border-b pb-4 flex flex-col sm:flex-row items-start space-x-4">
+              <!-- Thumbnail Image -->
+              <% if recipe.image.attached? %>
+                <%= link_to recipe_path(recipe), class: "flex-shrink-0" do %>
+                  <%= image_tag recipe.image.variant(resize_to_fill: [ 150, 150 ]), alt: "Photograph of #{recipe.title}", class: "w-36 h-36 object-cover rounded-md" %>
                 <% end %>
-              </div>
+              <% else %>
+                <div class="w-36 h-36 flex-shrink-0 bg-gray-100 rounded-md" aria-hidden="true"></div>
+              <% end %>
 
-              <p class="text-gray-700 text-sm mt-1">
-                <span class="font-medium">Description:</span> 
-                <%= truncate(recipe.description, length: 100, separator: ' ') %>
-              </p>
-
-              <div class="text-gray-700 text-sm mt-1">
-                <span class="font-medium">Ingredients:</span> 
-                <ul class="list-disc ml-5">
-                  <% recipe.ingredients.each do |ingredient| %>
-                    <li>
-                      <% if ingredient["name"].downcase.include?(params[:query].downcase) %>
-                        <strong><%= ingredient["name"] %></strong>
-                      <% else %>
-                        <%= ingredient["name"] %>
-                      <% end %>
-                      - <%= ingredient["quantity"] %> <%= ingredient["unit"] %>
-                    </li>
+              <!-- Recipe Info (Title, Description, Ingredients) -->
+              <div class="flex-grow">
+                <div>
+                  <%= link_to recipe_path(recipe), class: "text-lg font-semibold text-blue-700 hover:underline" do %>
+                    <%= recipe.title %>
                   <% end %>
-                </ul>
+                </div>
+
+                <p class="text-gray-600 text-sm mt-1">
+                  <span class="font-medium">Description:</span>
+                  <%= truncate(recipe.description, length: 100, separator: ' ') %>
+                </p>
+
+                <div class="text-gray-600 text-sm mt-1">
+                  <span class="font-medium">Ingredients:</span>
+                  <ul class="list-disc ml-5">
+                    <% Array(recipe.ingredients).each do |ingredient| %>
+                      <li>
+                        <% if highlight_ingredient?(ingredient["name"], @query, @ingredient) %>
+                          <strong><%= ingredient["name"] %></strong>
+                        <% else %>
+                          <%= ingredient["name"] %>
+                        <% end %>
+                        - <%= ingredient["quantity"] %> <%= ingredient["unit"] %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+                <p class="text-gray-500 text-xs mt-2">
+                  <span class="font-medium">Category:</span> <%= recipe.category.name if recipe.category %> |
+                  <span class="font-medium">Prep Time:</span> <%= recipe.prep_time %>
+                  <span class="font-medium">Cals:</span> <%= recipe.nutrition['calories'] %>
+                </p>
               </div>
-              <p class="text-gray-600 text-xs mt-2">
-                <span class="font-medium">Category:</span> <%= recipe.category.name if recipe.category %> |
-                <span class="font-medium">Prep Time:</span> <%= recipe.prep_time %>
-                <span class="font-medium">Cals:</span> <%= recipe.nutrition['calories'] %>
-              </p>
-            </div>
-          </li>
-        <% end %>
-      </ul>
-    </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% else %>
+      <div class="mt-6 text-gray-500 text-sm">
+        <p>No results found<%= " for \"#{@query}\"" if @query.present? %>. Try different keywords or fewer filters.</p>
+      </div>
+    <% end %>
   <% end %>
 
-  <% if @recipes.empty? %>
-    <div class="mt-6 text-gray-700 text-sm">
-      <p>No results found for "<%= params[:query] %>". Try searching with different keywords.</p>
-    </div>
-  <% end %>
-<% end %>
-  </div>
+  <%= render "shared/pagination", pagy: @pagy %>
 </div>
