@@ -230,6 +230,22 @@ RSpec.describe "Recipes" do
 
         expect(response.body).to include("Fluffy Pancakes")
       end
+
+      it "matches recipe descriptions" do
+        create(:recipe, title: "Mystery Bowl", description: "A quiet zorblewaffle of a breakfast")
+
+        get search_recipes_path, params: { query: "zorblewaffle" }
+
+        expect(response.body).to include("Mystery Bowl")
+      end
+
+      it "matches the ActionText instructions body" do
+        create(:recipe, title: "Slow Stew", instructions: "Simmer the zorblewaffle for an hour")
+
+        get search_recipes_path, params: { query: "zorblewaffle" }
+
+        expect(response.body).to include("Slow Stew")
+      end
     end
 
     context "with ingredient query" do
@@ -244,13 +260,94 @@ RSpec.describe "Recipes" do
 
         expect(response.body).to include("Egg Dish")
       end
+
+      it "filters by ingredient name without a keyword query" do
+        get search_recipes_path, params: { ingredient: "eggs" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Egg Dish")
+        expect(response.body).not_to include("Fluffy Pancakes")
+      end
+    end
+
+    context "with category filters" do
+      let(:breakfast) { create(:category, name: "Breakfast") }
+      let(:dinner) { create(:category, name: "Dinner") }
+      let(:lunch) { create(:category, name: "Lunch") }
+
+      before do
+        create(:recipe, title: "Morning Eggs", category: breakfast)
+        create(:recipe, title: "Evening Steak", category: dinner)
+        create(:recipe, title: "Midday Sandwich", category: lunch)
+      end
+
+      it "filters by a single category" do
+        get search_recipes_path, params: { category_ids: [ breakfast.id ] }
+
+        expect(response.body).to include("Morning Eggs")
+        expect(response.body).not_to include("Evening Steak")
+      end
+
+      it "filters by multiple categories" do
+        get search_recipes_path, params: { category_ids: [ breakfast.id, dinner.id ] }
+
+        expect(response.body).to include("Morning Eggs")
+        expect(response.body).to include("Evening Steak")
+        expect(response.body).not_to include("Midday Sandwich")
+      end
+
+      it "renders a checkbox for every category" do
+        get search_recipes_path
+
+        expect(response.body).to include("category_ids_#{breakfast.id}")
+        expect(response.body).to include("category_ids_#{dinner.id}")
+      end
+
+      it "ignores a non-array category_ids param" do
+        get search_recipes_path, params: { query: "pancakes", category_ids: "nonsense" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Fluffy Pancakes")
+      end
+    end
+
+    context "with sort options" do
+      let!(:apple) { create(:recipe, title: "Apple Zorblewaffle", created_at: 3.days.ago) }
+      let!(:mango) { create(:recipe, title: "Mango Zorblewaffle", created_at: 1.day.ago) }
+
+      it "sorts alphabetically" do
+        get search_recipes_path, params: { query: "zorblewaffle", sort: "alphabetical" }
+
+        expect(response.body.index(apple.title)).to be < response.body.index(mango.title)
+      end
+
+      it "sorts by newest" do
+        get search_recipes_path, params: { query: "zorblewaffle", sort: "newest" }
+
+        expect(response.body.index(mango.title)).to be < response.body.index(apple.title)
+      end
+
+      it "ignores an unrecognised sort value" do
+        get search_recipes_path, params: { query: "zorblewaffle", sort: "title; something else" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Apple Zorblewaffle")
+      end
+
+      it "renders the sort dropdown" do
+        get search_recipes_path
+
+        expect(response.body).to include("Sort by")
+        expect(response.body).to include("Alphabetical")
+      end
     end
 
     context "with no query" do
-      it "returns empty results" do
+      it "returns the empty search form" do
         get search_recipes_path, params: { query: "" }
 
         expect(response).to have_http_status(:ok)
+        expect(response.body).not_to include("Fluffy Pancakes")
       end
     end
 
@@ -259,6 +356,7 @@ RSpec.describe "Recipes" do
         get search_recipes_path, params: { query: "nonexistent" }
 
         expect(response).to have_http_status(:ok)
+        expect(response.body).to include("No results found")
       end
     end
 
