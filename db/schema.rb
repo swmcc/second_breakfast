@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_21_100300) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_21_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,6 +21,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_100300) do
     t.bigint "record_id", null: false
     t.string "record_type", null: false
     t.datetime "updated_at", null: false
+    t.index "to_tsvector('english'::regconfig, regexp_replace(COALESCE(body, ''::text), '<[^>]*>'::text, ' '::text, 'g'::text))", name: "index_action_text_rich_texts_on_body_tsvector", using: :gin
     t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
   end
 
@@ -133,13 +134,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_21_100300) do
     t.json "nutrition"
     t.string "prep_time"
     t.string "public_token", null: false
+    t.virtual "searchable", type: :tsvector, as: "(((setweight(to_tsvector('english'::regconfig, (COALESCE(title, ''::character varying))::text), 'A'::\"char\") || setweight(to_tsvector('english'::regconfig, COALESCE(description, ''::text)), 'B'::\"char\")) || setweight(to_tsvector('english'::regconfig, regexp_replace(regexp_replace(COALESCE((ingredients)::text, ''::text), '\"(quantity|unit)\"\\s*:\\s*(\"[^\"]*\"|[^,}]*)'::text, ' '::text, 'g'::text), '\"name\"\\s*:'::text, ' '::text, 'g'::text)), 'C'::\"char\")) || setweight(to_tsvector('english'::regconfig, COALESCE(instructions, ''::text)), 'D'::\"char\"))", stored: true
     t.integer "serves"
     t.string "title"
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.string "visibility", default: "public", null: false
+    t.index "lower((title)::text)", name: "index_recipes_on_lower_title"
     t.index ["category_id"], name: "index_recipes_on_category_id"
+    t.index ["created_at"], name: "index_recipes_on_created_at"
     t.index ["public_token"], name: "index_recipes_on_public_token", unique: true
+    t.index ["searchable"], name: "index_recipes_on_searchable", using: :gin
     t.index ["user_id"], name: "index_recipes_on_user_id"
     t.index ["visibility"], name: "index_recipes_on_visibility"
   end
