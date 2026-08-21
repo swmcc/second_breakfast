@@ -1,0 +1,25 @@
+<%# Error summary for a form. Locals: object, and an optional noun. %>
+<%# Rendered as an alert with tabindex of -1 so the submit-failure handler can %>
+<%# move focus here, and each entry links to the field it came from. %>
+<% noun = local_assigns.fetch(:noun, object.model_name.human.downcase) %>
+<% if object.errors.any? %>
+  <div id="error_explanation"
+       role="alert"
+       tabindex="-1"
+       data-error-summary
+       class="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 ring-1 ring-inset ring-red-700/30">
+    <h2 class="font-semibold">
+      <%= pluralize(object.errors.count, "error") %> prohibited this <%= noun %> from being saved
+    </h2>
+
+    <ul class="mt-2 list-disc space-y-1 pl-5">
+      <% object.errors.each do |error| %>
+        <li>
+          <%= link_to error.full_message,
+                      "##{field_dom_id(object, error.attribute)}",
+                      class: "underline decoration-red-700/40 underline-offset-2 hover:decoration-red-800" %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

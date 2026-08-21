@@ -1,7 +1,6 @@
 <% content_for :title, "Meal Plan #{@meal_plan.week_start_date.strftime('%-d %b')} | Second Breakfast" %>
 
 <section class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8" data-controller="meal-picker">
-  <%= render "flash" %>
 
   <% if @meal_plan.archived? %>
     <div class="mb-6 rounded-md bg-gray-50 px-4 py-3 text-sm text-gray-600 ring-1 ring-inset ring-gray-200">

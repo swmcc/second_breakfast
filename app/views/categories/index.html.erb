@@ -1,39 +1,36 @@
 <% content_for :title, "Categories" %>
+<% breadcrumbs [ "Categories" ] %>
 
 <div class="w-full">
-  <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
-  <% end %>
-
-  <% if signed_in? %>
-  <div class="flex justify-between items-center">
-    <h1 class="font-bold text-4xl">Recipe Categories</h1>
-    <%= link_to "New category", new_category_path, class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Recipe Categories</h1>
+    <% if signed_in? %>
+      <%= link_to "New category", new_category_path, class: "inline-flex min-h-11 items-center rounded-md bg-blue-600 px-3.5 py-2.5 font-medium text-white hover:bg-blue-700" %>
+    <% end %>
   </div>
-  <% end %>
   <div id="categories" class="min-w-full mt-8">
     <% if @categories.any? %>
       <div class="space-y-8">
         <% @categories.each do |category| %>
           <div class="border-b pb-6">
-            <h2 class="text-2xl font-bold mb-4"><%= category.name %></h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-4"><%= category.name %></h2>
             <% if category.recipes.any? %>
-              <ul class="ml-6 space-y-2">
+              <ul role="list" class="ml-6 space-y-2">
                 <% category.recipes.each do |recipe| %>
                   <li>
-                    <%= link_to recipe.title, recipe_path(recipe), class: "text-blue-600 hover:text-blue-800" %>
-                    <span class="text-gray-500"> - <%= recipe.description %></span>
+                    <%= link_to recipe.title, recipe_path(recipe), class: "font-medium text-blue-700 hover:text-blue-800 hover:underline" %>
+                    <span class="text-gray-600"> &ndash; <%= recipe.description %></span>
                   </li>
                 <% end %>
               </ul>
             <% else %>
-              <p class="text-gray-500 italic ml-6">No recipes in this category yet.</p>
+              <p class="text-gray-600 italic ml-6">No recipes in this category yet.</p>
             <% end %>
           </div>
         <% end %>
       </div>
     <% else %>
-      <p class="text-center my-10 text-gray-500">No categories found.</p>
+      <p class="text-center my-10 text-gray-600">No categories found.</p>
     <% end %>
   </div>
 </div>

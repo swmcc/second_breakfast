@@ -1,32 +1,53 @@
+<% content_for :title, "Search results | Second Breakfast" %>
+<% breadcrumbs [ "Recipes", recipes_path ], [ "Search" ] %>
+
+<div class="w-full">
+  <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+    <% if params[:query].present? %>
+      Search results for &ldquo;<%= params[:query] %>&rdquo;
+    <% else %>
+      Search recipes
+    <% end %>
+  </h1>
+
+  <p class="mt-2 text-gray-700" role="status">
+    <% if params[:query].present? %>
+      <%= pluralize(@recipes.size, "recipe") %> found.
+    <% else %>
+      Use the search box above to look for a recipe by name or ingredient.
+    <% end %>
+  </p>
+
+  <div class="mt-8">
 <% if params[:query].present? %>
   <% if @recipes.any? %>
     <div class="mb-8">
-      <ul class="space-y-6">
+      <ul role="list" class="space-y-6">
         <% @recipes.each do |recipe| %>
-          <li class="border-b pb-4 flex flex-col sm:flex-row items-start space-x-4">
+          <li class="border-b pb-4 flex flex-col gap-4 sm:flex-row sm:items-start">
             <!-- Thumbnail Image -->
             <% if recipe.image.attached? %>
               <%= link_to recipe_path(recipe), class: "flex-shrink-0" do %>
-                <%= image_tag recipe.image.variant(resize_to_fill: [150, 150]), class: "w-36 h-36 object-cover rounded-md" %>
+                <%= image_tag recipe.image.variant(resize_to_fill: [ 150, 150 ]), alt: "Photograph of #{recipe.title}", class: "w-36 h-36 object-cover rounded-md" %>
               <% end %>
             <% else %>
-              <div class="w-36 h-36 bg-gray-200 rounded-md"></div>
+              <div class="w-36 h-36 flex-shrink-0 bg-gray-100 rounded-md" aria-hidden="true"></div>
             <% end %>
 
             <!-- Recipe Info (Title, Description, Ingredients) -->
             <div class="flex-grow">
               <div>
-                <%= link_to recipe_path(recipe), class: "text-lg font-semibold text-blue-600 hover:underline" do %>
+                <%= link_to recipe_path(recipe), class: "text-lg font-semibold text-blue-700 hover:underline" do %>
                   <%= recipe.title %>
                 <% end %>
               </div>
 
-              <p class="text-gray-600 text-sm mt-1">
+              <p class="text-gray-700 text-sm mt-1">
                 <span class="font-medium">Description:</span> 
                 <%= truncate(recipe.description, length: 100, separator: ' ') %>
               </p>
 
-              <p class="text-gray-600 text-sm mt-1">
+              <div class="text-gray-700 text-sm mt-1">
                 <span class="font-medium">Ingredients:</span> 
                 <ul class="list-disc ml-5">
                   <% recipe.ingredients.each do |ingredient| %>
@@ -40,8 +61,8 @@
                     </li>
                   <% end %>
                 </ul>
-              </p>
-              <p class="text-gray-500 text-xs mt-2">
+              </div>
+              <p class="text-gray-600 text-xs mt-2">
                 <span class="font-medium">Category:</span> <%= recipe.category.name if recipe.category %> |
                 <span class="font-medium">Prep Time:</span> <%= recipe.prep_time %>
                 <span class="font-medium">Cals:</span> <%= recipe.nutrition['calories'] %>
@@ -54,8 +75,10 @@
   <% end %>
 
   <% if @recipes.empty? %>
-    <div class="mt-6 text-gray-500 text-sm">
+    <div class="mt-6 text-gray-700 text-sm">
       <p>No results found for "<%= params[:query] %>". Try searching with different keywords.</p>
     </div>
   <% end %>
 <% end %>
+  </div>
+</div>

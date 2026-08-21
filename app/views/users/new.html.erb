@@ -1,31 +1,43 @@
-<h1>Sign Up</h1>
+<% content_for :title, "Sign up | Second Breakfast" %>
 
-<%= form_with(model: @user, local: true) do |form| %>
-  <% if @user.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</h2>
-      <ul>
-        <% @user.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
+<section class="mx-auto w-full max-w-sm">
+  <h1 class="text-2xl font-bold tracking-tight text-gray-900">Sign up</h1>
 
-  <div>
-    <%= form.label :email %>
-    <%= form.email_field :email %>
+  <div class="mt-8">
+    <%= render "shared/error_summary", object: @user, noun: "user" %>
+
+    <%= form_with(model: @user, local: true, class: "space-y-6") do |form| %>
+      <div>
+        <%= form.label :email, "Email address", class: "block text-sm/6 font-medium text-gray-900" %>
+        <div class="mt-2">
+          <%= form.email_field :email, autocomplete: "email", required: true,
+                class: "block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline outline-1 -outline-offset-1 sm:text-sm/6 #{@user.errors.include?(:email) ? 'outline-red-700' : 'outline-gray-400'}",
+                **field_error_attributes(@user, :email) %>
+        </div>
+        <%= render "shared/field_error", object: @user, attribute: :email %>
+      </div>
+
+      <div>
+        <%= form.label :password, class: "block text-sm/6 font-medium text-gray-900" %>
+        <div class="mt-2">
+          <%= form.password_field :password, autocomplete: "new-password", required: true,
+                class: "block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline outline-1 -outline-offset-1 sm:text-sm/6 #{@user.errors.include?(:password) ? 'outline-red-700' : 'outline-gray-400'}",
+                **field_error_attributes(@user, :password) %>
+        </div>
+        <%= render "shared/field_error", object: @user, attribute: :password %>
+      </div>
+
+      <div>
+        <%= form.label :password_confirmation, "Confirm password", class: "block text-sm/6 font-medium text-gray-900" %>
+        <div class="mt-2">
+          <%= form.password_field :password_confirmation, autocomplete: "new-password", required: true,
+                class: "block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline outline-1 -outline-offset-1 sm:text-sm/6 #{@user.errors.include?(:password_confirmation) ? 'outline-red-700' : 'outline-gray-400'}",
+                **field_error_attributes(@user, :password_confirmation) %>
+        </div>
+        <%= render "shared/field_error", object: @user, attribute: :password_confirmation %>
+      </div>
+
+      <%= form.submit "Sign Up", class: "flex min-h-11 w-full cursor-pointer justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-700" %>
+    <% end %>
   </div>
-
-  <div>
-    <%= form.label :password %>
-    <%= form.password_field :password %>
-  </div>
-
-  <div>
-    <%= form.label :password_confirmation %>
-    <%= form.password_field :password_confirmation %>
-  </div>
-
-  <%= form.submit "Sign Up" %>
-<% end %>
+</section>
