@@ -1,0 +1,180 @@
+name: Kamal
+
+# Reusable workflow that performs a single Kamal action against one destination.
+# Called by .github/workflows/deploy.yml -- never triggered directly.
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub Environment to run in (staging or production).
+        required: true
+        type: string
+      destination:
+        description: Kamal destination passed as `-d` (staging or production).
+        required: true
+        type: string
+      ref:
+        description: Git ref or SHA to check out and deploy.
+        required: true
+        type: string
+      action:
+        description: Either `deploy` or `rollback`.
+        required: false
+        default: deploy
+        type: string
+      version:
+        description: Kamal version (image tag / commit SHA) to roll back to. Only used when action is `rollback`.
+        required: false
+        default: ""
+        type: string
+    # Declared as optional so the caller can use `secrets: inherit`, which is
+    # what makes Environment-scoped secrets resolve inside this job. Each one is
+    # checked at runtime below and fails the job with a clear message.
+    secrets:
+      KAMAL_REGISTRY_PASSWORD:
+        required: false
+      RAILS_MASTER_KEY:
+        required: false
+      SSH_PRIVATE_KEY:
+        required: false
+      SSH_KNOWN_HOSTS:
+        required: false
+
+jobs:
+  kamal:
+    name: ${{ inputs.action }} to ${{ inputs.destination }}
+    runs-on: ubuntu-latest
+
+    # The GitHub Environment is what gates production: configure required
+    # reviewers on it in Settings -> Environments (see docs/deployment.md).
+    environment: ${{ inputs.environment }}
+
+    # Never let two deploys to the same destination overlap. Kamal takes its own
+    # remote lock too, but queueing here gives a much clearer failure mode.
+    concurrency:
+      group: kamal-${{ inputs.destination }}
+      cancel-in-progress: false
+
+    env:
+      KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
+      DESTINATION: ${{ inputs.destination }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+          # Kamal derives the image version from the git SHA, so it needs real
+          # git metadata rather than a shallow archive.
+          fetch-depth: 0
+
+      - name: Install libvips
+        run: sudo apt-get update && sudo apt-get install -y libvips-dev
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Write Rails master key
+        env:
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+        run: |
+          if [ -z "$RAILS_MASTER_KEY" ]; then
+            echo "::error::RAILS_MASTER_KEY secret is not set for the ${{ inputs.environment }} environment."
+            exit 1
+          fi
+          # .kamal/secrets-common reads the key from config/master.key, which is
+          # gitignored and therefore absent on a fresh checkout.
+          printf '%s' "$RAILS_MASTER_KEY" > config/master.key
+          chmod 600 config/master.key
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          if [ -z "$SSH_PRIVATE_KEY" ]; then
+            echo "::error::SSH_PRIVATE_KEY secret is not set for the ${{ inputs.environment }} environment."
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_kamal
+          chmod 600 ~/.ssh/id_kamal
+          {
+            echo "Host *"
+            echo "  IdentityFile ~/.ssh/id_kamal"
+            echo "  IdentitiesOnly yes"
+          } > ~/.ssh/config
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+            chmod 600 ~/.ssh/known_hosts
+            echo "  StrictHostKeyChecking yes" >> ~/.ssh/config
+          else
+            echo "::warning::SSH_KNOWN_HOSTS is not set; falling back to StrictHostKeyChecking=accept-new."
+            echo "  StrictHostKeyChecking accept-new" >> ~/.ssh/config
+          fi
+          chmod 600 ~/.ssh/config
+
+      - name: Check the registry password is available
+        run: |
+          if [ -z "$KAMAL_REGISTRY_PASSWORD" ]; then
+            echo "::error::KAMAL_REGISTRY_PASSWORD secret is not set for the ${{ inputs.environment }} environment."
+            exit 1
+          fi
+
+      - name: Show Kamal configuration
+        run: bin/kamal config -d "$DESTINATION"
+
+      - name: Deploy
+        if: inputs.action == 'deploy'
+        run: bin/kamal deploy -d "$DESTINATION"
+
+      - name: Roll back
+        if: inputs.action == 'rollback'
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if [ -z "$VERSION" ]; then
+            echo "::error::A version is required to roll back. Pick one from 'kamal app containers'."
+            exit 1
+          fi
+          bin/kamal rollback "$VERSION" -d "$DESTINATION"
+
+      - name: Run database migrations
+        if: inputs.action == 'deploy'
+        run: |
+          # bin/docker-entrypoint already runs `db:prepare` when the container
+          # boots; this makes the result explicit and fails the job loudly if a
+          # migration did not apply.
+          bin/kamal app exec -d "$DESTINATION" --reuse "bin/rails db:migrate"
+          bin/kamal app exec -d "$DESTINATION" --reuse "bin/rails db:migrate:status"
+
+      - name: Summarise
+        if: always()
+        run: |
+          {
+            echo "## Kamal ${{ inputs.action }} -- ${{ inputs.destination }}"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Destination | \`${{ inputs.destination }}\` |"
+            echo "| Environment | \`${{ inputs.environment }}\` |"
+            echo "| Ref | \`${{ inputs.ref }}\` |"
+            echo "| Version | \`${{ inputs.version || github.sha }}\` |"
+            echo "| Result | \`${{ job.status }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Release the Kamal lock
+        if: failure()
+        run: bin/kamal lock release -d "$DESTINATION" || true
+
+      - name: Remove credentials
+        if: always()
+        run: rm -f config/master.key ~/.ssh/id_kamal

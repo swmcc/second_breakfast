@@ -371,6 +371,7 @@ GEM
       logger
     shoulda-matchers (8.0.1)
       activesupport (>= 7.2)
+    simplecov (1.1.1)
     solid_cable (4.0.2)
       actioncable (>= 7.2)
       activejob (>= 7.2)
@@ -432,6 +433,7 @@ GEM
 PLATFORMS
   arm64-darwin-23
   arm64-darwin-24
+  arm64-darwin-25
   x86_64-linux
 
 DEPENDENCIES
@@ -448,7 +450,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kamal
-  pagy (~> 9.0)
+  pagy (~> 9.4)
   pg (~> 1.6)
   propshaft
   puma (>= 5.0)
@@ -463,6 +465,7 @@ DEPENDENCIES
   sentry-rails
   sentry-ruby
   shoulda-matchers
+  simplecov
   solid_cable
   solid_cache
   solid_queue (~> 1.5)
