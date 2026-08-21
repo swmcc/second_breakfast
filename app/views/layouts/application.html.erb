@@ -27,10 +27,13 @@
   <header class="bg-white">
   <nav class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
     <div class="flex flex-1">
+      <%# Static nav chrome only - nothing auth dependent lives inside. %>
+      <% cache "nav/primary-links" do %>
       <div class="hidden lg:flex lg:gap-x-12">
         <%= link_to "Recipes", recipes_path, class: "text-sm/6 font-semibold text-gray-900" %>
         <%= link_to "Categories", categories_path, class: "text-sm/6 font-semibold text-gray-900" %>
       </div>
+      <% end %>
       <div class="flex lg:hidden">
         <button type="button" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700">
           <span class="sr-only">Open main menu</span>
@@ -70,7 +73,13 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
           </svg>
-          <span class="text-sm font-medium"><%= pluralize(current_user.baskets.count, 'Saved Recipe') %></span>
+          <%# Per-user fragment. The key is built from current_user, so it carries
+              the user id and updated_at; Basket touches the user, so adding or
+              removing a recipe busts it. A signed-out visitor never reaches this
+              branch, and could not read another user's key if they did. %>
+          <% cache [ current_user, "nav/basket-count" ] do %>
+            <span class="text-sm font-medium"><%= pluralize(current_user.baskets.count, 'Saved Recipe') %></span>
+          <% end %>
         <% end %>
 
         <%# User dropdown menu %>
@@ -143,8 +152,10 @@
           </div>
           <input type="search" class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500" placeholder="Search..." />
         </div>
-        <%= link_to "Recipes", recipes_path, class: "-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50" %>
-        <%= link_to "Categories", categories_path, class: "-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50" %>
+        <% cache "nav/mobile-links" do %>
+          <%= link_to "Recipes", recipes_path, class: "-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50" %>
+          <%= link_to "Categories", categories_path, class: "-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50" %>
+        <% end %>
       </div>
     </div>
   </div>
@@ -167,10 +178,12 @@
 <footer class="bg-white">
     <div class="mx-auto mt-8 max-w-7xl border-t border-gray-900/10 px-6 py-8 md:flex md:items-center md:justify-between lg:px-8">
       <div class="flex gap-x-6 md:order-2">
+        <% cache "nav/footer-links" do %>
         <%= link_to "About", about_path, class: "text-sm/6 text-gray-600 hover:text-gray-900" %>
         <%= link_to "Colophon", colophon_path, class: "text-sm/6 text-gray-600 hover:text-gray-900" %>
         <%= link_to "Privacy", privacy_path, class: "text-sm/6 text-gray-600 hover:text-gray-900" %>
         <%= link_to "Terms", terms_path, class: "text-sm/6 text-gray-600 hover:text-gray-900" %>
+        <% end %>
       </div>
       <p class="mt-8 text-sm/6 text-gray-600 md:order-1 md:mt-0">Built with ❤️ by <%= link_to "swmcc", "https://swm.cc", class: "font-medium text-gray-900 hover:text-indigo-600" %></p>
     </div>

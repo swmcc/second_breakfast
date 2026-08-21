@@ -25,6 +25,10 @@ Rails.application.configure do
     config.action_controller.perform_caching = false
   end
 
+  # Fragment caching is toggled by `bin/rails dev:cache`, which writes
+  # tmp/caching-dev.txt and flips perform_caching above. An in-process memory
+  # store is used rather than Solid Cache because only the production database
+  # configuration defines a separate `cache` database.
   # Change to :null_store to avoid any caching.
   config.cache_store = :memory_store
 

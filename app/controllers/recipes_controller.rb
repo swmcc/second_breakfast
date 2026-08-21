@@ -60,19 +60,41 @@ class RecipesController < ApplicationController
 
   def search
     if params[:query].present?
-      query = "%#{ActiveRecord::Base.sanitize_sql_like(params[:query])}%"
-
-      if ActiveRecord::Base.connection.adapter_name.downcase.include?("postgresql")
-        @recipes = Recipe.where("LOWER(title) LIKE LOWER(?) OR LOWER(ingredients::text) LIKE LOWER(?)", query, query)
-      else
-        @recipes = Recipe.where("LOWER(title) LIKE LOWER(?) OR LOWER(json_extract(ingredients, '$')) LIKE LOWER(?)", query, query)
-      end
+      @recipes = Recipe.where(id: cached_search_ids(params[:query]))
     else
       @recipes = []
     end
   end
 
   private
+    # Caches the matching recipe *ids* only - never the rendered HTML, which
+    # carries per-user nav chrome. The key is built from the normalised query
+    # string plus the recipes collection version (COUNT + MAX(updated_at)), so
+    # it is independent of how search is implemented underneath and a recipe
+    # change invalidates every cached query immediately. The short TTL is a
+    # backstop for anything the version key cannot see.
+    def cached_search_ids(query)
+      key = [ "recipes/search", Recipe.all.cache_key_with_version, normalised_search_query(query) ]
+
+      Rails.cache.fetch(key, expires_in: Recipe::SEARCH_CACHE_TTL) do
+        search_results_for(query).pluck(:id)
+      end
+    end
+
+    def normalised_search_query(query)
+      query.to_s.strip.downcase.squeeze(" ")
+    end
+
+    def search_results_for(query)
+      like = "%#{ActiveRecord::Base.sanitize_sql_like(query)}%"
+
+      if ActiveRecord::Base.connection.adapter_name.downcase.include?("postgresql")
+        Recipe.where("LOWER(title) LIKE LOWER(?) OR LOWER(ingredients::text) LIKE LOWER(?)", like, like)
+      else
+        Recipe.where("LOWER(title) LIKE LOWER(?) OR LOWER(json_extract(ingredients, '$')) LIKE LOWER(?)", like, like)
+      end
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_recipe
       @recipe = Recipe.find(params.expect(:id))

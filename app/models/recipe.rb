@@ -1,5 +1,12 @@
 class Recipe < ApplicationRecord
-  belongs_to :category
+  # Short TTL for cached search result ids. Kept in minutes, not hours: the
+  # cache key also carries the recipes collection version, so this is only a
+  # backstop for anything the version key cannot see.
+  SEARCH_CACHE_TTL = 5.minutes
+
+  # touch: true so a recipe change busts any fragment cached against its
+  # category (the categories index lists each category's recipes).
+  belongs_to :category, touch: true
 
   has_many :baskets, dependent: :destroy
   has_many :users, through: :baskets

@@ -1,3 +1,9 @@
+<%# Whole-recipe fragment. Keyed on the recipe (Rails' cache_key_with_version,
+    i.e. id + updated_at) and on its category, whose name is rendered below.
+    Action Text and Active Storage both touch the recipe, so editing the
+    instructions or swapping the image busts this too. Nothing user specific is
+    rendered here - the Save/Edit/Delete buttons live in recipes/show. %>
+<% cache [ "recipes/recipe", recipe, recipe.category ] do %>
 <div id="<%= dom_id recipe %>" class="max-w-7xl mx-auto bg-white rounded-lg shadow p-8">
   <div class="space-y-8">
     <div class="flex justify-between items-center">
@@ -92,4 +98,4 @@
     </div>
   </div>
 </div>
-
+<% end %>
