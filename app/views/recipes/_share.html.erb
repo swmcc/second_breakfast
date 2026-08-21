@@ -1,0 +1,41 @@
+<% share_url = recipe_share_url(recipe) %>
+<% print_url = local_assigns.fetch(:print_url, print_recipe_path(recipe)) %>
+
+<section class="rounded-lg bg-white shadow p-6 print:hidden" aria-labelledby="share-heading">
+  <h3 id="share-heading" class="text-xl font-semibold text-gray-900">Share this recipe</h3>
+
+  <% if recipe.private_recipe? %>
+    <p class="mt-2 text-sm text-amber-700 bg-amber-50 rounded-md px-3 py-2">
+      This recipe is private. Anyone you give this link to can read it, even without signing in.
+    </p>
+  <% end %>
+
+  <div class="mt-4" data-controller="share" data-share-url-value="<%= share_url %>">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <label class="sr-only" for="share-link-<%= recipe.id %>">Share link</label>
+      <input id="share-link-<%= recipe.id %>"
+             type="text"
+             readonly
+             value="<%= share_url %>"
+             class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-gray-50">
+
+      <button type="button"
+              data-action="share#copy"
+              class="shrink-0 rounded-md px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm">
+        <span data-share-target="label">Copy share link</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-4 flex flex-wrap gap-2">
+    <% recipe_share_targets(recipe, share_url).each do |target| %>
+      <%= link_to target[:name], target[:href],
+          target: "_blank",
+          rel: "noopener noreferrer nofollow",
+          class: "rounded-md px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium" %>
+    <% end %>
+
+    <%= link_to "Print", print_url,
+        class: "rounded-md px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium" %>
+  </div>
+</section>

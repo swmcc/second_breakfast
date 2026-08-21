@@ -175,4 +175,149 @@ RSpec.describe Recipe do
       expect(ingredient).to include("name", "quantity", "unit")
     end
   end
+
+  describe "sharing and visibility" do
+    describe "associations" do
+      it { is_expected.to belong_to(:user).optional }
+      it { is_expected.to have_many(:ratings).dependent(:destroy) }
+      it { is_expected.to have_many(:reviews).dependent(:destroy) }
+      it { is_expected.to have_many(:favorites).dependent(:destroy) }
+    end
+
+    describe "visibility" do
+      it "defaults to public so pre-existing recipes stay readable" do
+        expect(create(:recipe).visibility).to eq(Recipe::PUBLIC)
+      end
+
+      it "rejects an unknown visibility" do
+        recipe = build(:recipe, visibility: "unlisted")
+
+        expect(recipe).not_to be_valid
+        expect(recipe.errors[:visibility]).to be_present
+      end
+
+      it "answers #public_recipe? and #private_recipe?" do
+        expect(build(:recipe, :public_recipe)).to be_public_recipe
+        expect(build(:recipe, :private_recipe)).to be_private_recipe
+      end
+    end
+
+    describe ".visible_to" do
+      let(:owner) { create(:user) }
+      let(:other) { create(:user) }
+      let!(:public_recipe) { create(:recipe, :public_recipe) }
+      let!(:own_private) { create(:recipe, :private_recipe, user: owner) }
+      let!(:other_private) { create(:recipe, :private_recipe, user: other) }
+
+      it "returns only public recipes when signed out" do
+        expect(described_class.visible_to(nil)).to contain_exactly(public_recipe)
+      end
+
+      it "returns public recipes plus the user's own private ones" do
+        expect(described_class.visible_to(owner)).to contain_exactly(public_recipe, own_private)
+      end
+
+      it "never returns another user's private recipe" do
+        expect(described_class.visible_to(other)).not_to include(own_private)
+      end
+
+      it "composes with other relation methods" do
+        relation = described_class.includes(:category).order(created_at: :desc).visible_to(owner)
+
+        expect(relation).to contain_exactly(public_recipe, own_private)
+      end
+    end
+
+    describe "#visible_to?" do
+      let(:owner) { create(:user) }
+
+      it "is true for anyone on a public recipe" do
+        expect(create(:recipe, :public_recipe).visible_to?(nil)).to be true
+      end
+
+      it "is true for the owner of a private recipe" do
+        expect(create(:recipe, :private_recipe, user: owner).visible_to?(owner)).to be true
+      end
+
+      it "is false for another user on a private recipe" do
+        expect(create(:recipe, :private_recipe, user: owner).visible_to?(create(:user))).to be false
+      end
+
+      it "is false when signed out on a private recipe" do
+        expect(create(:recipe, :private_recipe, user: owner).visible_to?(nil)).to be false
+      end
+    end
+
+    describe "#editable_by?" do
+      let(:owner) { create(:user) }
+
+      it "is true for the owner" do
+        expect(create(:recipe, user: owner).editable_by?(owner)).to be true
+      end
+
+      it "is false for another user" do
+        expect(create(:recipe, user: owner).editable_by?(create(:user))).to be false
+      end
+
+      it "is true for any signed-in user on an unowned legacy recipe" do
+        expect(create(:recipe).editable_by?(create(:user))).to be true
+      end
+
+      it "is false when signed out" do
+        expect(create(:recipe).editable_by?(nil)).to be false
+      end
+    end
+
+    describe "#public_token" do
+      it "is generated on create" do
+        expect(create(:recipe).public_token).to be_present
+      end
+
+      it "is unique per recipe" do
+        tokens = create_list(:recipe, 3).map(&:public_token)
+
+        expect(tokens.uniq.size).to eq(3)
+      end
+
+      it "is long enough not to be guessable" do
+        expect(create(:recipe).public_token.length).to be >= 24
+      end
+    end
+
+    describe "ratings aggregation" do
+      let(:recipe) { create(:recipe) }
+
+      it "has no average before anyone rates it" do
+        expect(recipe.average_rating).to be_nil
+        expect(recipe.ratings_count).to eq(0)
+      end
+
+      it "averages the rating values" do
+        create(:rating, recipe: recipe, value: 5)
+        create(:rating, recipe: recipe, value: 2)
+
+        expect(recipe.average_rating).to eq(3.5)
+        expect(recipe.ratings_count).to eq(2)
+      end
+
+      it "finds a given user's rating" do
+        user = create(:user)
+        rating = create(:rating, recipe: recipe, user: user, value: 4)
+
+        expect(recipe.rating_by(user)).to eq(rating)
+        expect(recipe.rating_by(create(:user))).to be_nil
+        expect(recipe.rating_by(nil)).to be_nil
+      end
+    end
+
+    describe "ownership after the owner deletes their account" do
+      it "keeps the recipe but clears the owner" do
+        owner = create(:user)
+        recipe = create(:recipe, user: owner)
+
+        expect { owner.destroy }.not_to change(described_class, :count)
+        expect(recipe.reload.user_id).to be_nil
+      end
+    end
+  end
 end

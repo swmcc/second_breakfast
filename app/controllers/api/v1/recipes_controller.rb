@@ -6,7 +6,7 @@ module Api
       before_action :set_recipe, only: [ :show, :update, :destroy ]
 
       def index
-        recipes = Recipe.includes(:category).order(created_at: :desc)
+        recipes = Recipe.visible_to(current_user).includes(:category).order(created_at: :desc)
         @pagy, @recipes = pagy(recipes)
         @pagination = pagy_metadata(@pagy)
       end
@@ -17,7 +17,8 @@ module Api
 
       def search
         query = ActiveRecord::Base.sanitize_sql_like(params[:query].to_s.strip)
-        recipes = Recipe.includes(:category)
+        recipes = Recipe.visible_to(current_user)
+                        .includes(:category)
                         .where("title ILIKE :q OR description ILIKE :q", q: "%#{query}%")
                         .order(created_at: :desc)
         @pagy, @recipes = pagy(recipes)
@@ -27,6 +28,7 @@ module Api
 
       def create
         @recipe = Recipe.new(recipe_params)
+        @recipe.user = current_user
         attach_image if params[:recipe][:image_data].present?
         @recipe.save!
 
@@ -51,19 +53,23 @@ module Api
 
       private
 
+      # Private recipes belonging to someone else are simply not found.
       def set_recipe
-        @recipe = Recipe.find(params[:id])
+        @recipe = Recipe.visible_to(current_user).find(params[:id])
       end
 
       def recipe_params
         params.require(:recipe).permit(
-          :title, :description, :serves, :prep_time, :category_id,
+          :title, :description, :serves, :prep_time, :category_id, :visibility,
           ingredients: [ :name, :quantity, :unit ],
           nutrition: {}
         ).tap do |p|
           if params[:recipe].key?(:instructions)
             p[:instructions] = params.dig(:recipe, :instructions)
           end
+
+          # Only the owner may flip an existing recipe between public and private.
+          p.delete(:visibility) if @recipe.present? && !@recipe.editable_by?(current_user)
         end
       end
 

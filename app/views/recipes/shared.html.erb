@@ -1,0 +1,62 @@
+<% content_for :title, @recipe.title %>
+<% content_for :head do %>
+  <%= render "recipes/meta_tags", recipe: @recipe %>
+<% end %>
+
+<div class="md:w-2/3 w-full">
+  <p class="py-2 px-3 bg-indigo-50 mb-5 text-indigo-700 font-medium rounded-md inline-block">
+    Shared recipe &mdash; someone sent you this link.
+  </p>
+
+  <%= render @recipe %>
+
+  <div class="mt-8 space-y-8">
+    <%= render "recipes/share", recipe: @recipe, print_url: print_shared_recipe_path(@recipe.public_token) %>
+
+    <section class="rounded-lg bg-white shadow p-6">
+      <h3 class="text-xl font-semibold text-gray-900">Ratings</h3>
+      <p class="mt-2 text-gray-600">
+        <% if (average = formatted_average_rating(@recipe)) %>
+          <span class="text-2xl font-semibold text-gray-900"><%= average %></span>
+          <span class="text-sm">out of 5 &middot; <%= pluralize(@recipe.ratings_count, "rating") %></span>
+        <% else %>
+          <span class="text-sm">No ratings yet.</span>
+        <% end %>
+      </p>
+    </section>
+
+    <% reviews = @recipe.reviews.includes(:user).newest_first %>
+    <section class="rounded-lg bg-white shadow p-6">
+      <h3 class="text-xl font-semibold text-gray-900"><%= pluralize(reviews.size, "Review") %></h3>
+      <% if reviews.any? %>
+        <ul class="mt-4 space-y-4">
+          <% reviews.each do |review| %>
+            <li class="rounded-lg bg-gray-50 p-4">
+              <div class="flex items-baseline justify-between gap-4">
+                <p class="text-sm font-medium text-gray-900"><%= review.user.email %></p>
+                <p class="text-xs text-gray-500"><%= l review.created_at, format: :long %></p>
+              </div>
+              <p class="mt-2 text-gray-700 whitespace-pre-line"><%= review.body %></p>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="mt-4 text-sm text-gray-500">No reviews yet.</p>
+      <% end %>
+
+      <% unless signed_in? %>
+        <p class="mt-4 text-sm text-gray-500 print:hidden">
+          <%= link_to "Sign in", sign_in_path, class: "text-indigo-600 hover:text-indigo-500 underline" %>
+          to rate or review recipes.
+        </p>
+      <% end %>
+    </section>
+
+    <% if @recipe.visible_to?(current_user) %>
+      <p class="print:hidden">
+        <%= link_to "Open the full recipe page", recipe_path(@recipe),
+            class: "text-indigo-600 hover:text-indigo-500 underline" %>
+      </p>
+    <% end %>
+  </div>
+</div>

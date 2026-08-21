@@ -13,3 +13,7 @@ end
 json.image_url url_for(recipe.image) if recipe.image.attached?
 json.created_at recipe.created_at.iso8601
 json.updated_at recipe.updated_at.iso8601
+json.visibility recipe.visibility
+json.share_url shared_recipe_url(recipe.public_token)
+json.average_rating recipe.average_rating
+json.ratings_count recipe.ratings_count

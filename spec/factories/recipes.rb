@@ -29,6 +29,20 @@ FactoryBot.define do
       recipe.instructions = Faker::Food.description if recipe.instructions.blank?
     end
 
+    # Recipes created before ownership existed have no owner, so the default
+    # factory recipe mirrors that: unowned and public.
+    trait :owned do
+      user
+    end
+
+    trait :public_recipe do
+      visibility { Recipe::PUBLIC }
+    end
+
+    trait :private_recipe do
+      visibility { Recipe::PRIVATE }
+    end
+
     trait :with_image do
       after(:build) do |recipe|
         recipe.image.attach(
