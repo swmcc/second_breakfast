@@ -6,10 +6,25 @@ class User < ApplicationRecord
   has_many :api_keys, dependent: :destroy
   has_many :meal_plans, dependent: :destroy
 
+  # Recipes this user authored. Nullified rather than destroyed on account
+  # deletion so shared/public recipes outlive their author.
+  has_many :owned_recipes, class_name: "Recipe", foreign_key: :user_id, inverse_of: :user, dependent: :nullify
+
+  has_many :ratings, dependent: :destroy
+  has_many :reviews, dependent: :destroy
+  has_many :favorites, dependent: :destroy
+  has_many :favorite_recipes, through: :favorites, source: :recipe
+
   validates :email, presence: true, uniqueness: true
 
   def in_basket?(recipe)
     baskets.exists?(recipe: recipe)
+  end
+
+  def favorited?(recipe)
+    return false if recipe.blank?
+
+    favorites.exists?(recipe_id: recipe.id)
   end
 
   def aggregated_ingredients

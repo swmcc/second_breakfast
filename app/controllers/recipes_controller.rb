@@ -4,15 +4,20 @@ class RecipesController < ApplicationController
   include Pagy::Backend
 
   before_action :authenticate_user!, only: [ :new, :create, :edit, :update, :destroy ]
-  before_action :set_recipe, only: %i[ show edit update destroy ]
+  before_action :set_recipe, only: %i[ show print edit update destroy ]
 
   # GET /recipes or /recipes.json
   def index
-    @pagy, @recipes = paginate_recipes(Recipe.all)
+    @pagy, @recipes = paginate_recipes(Recipe.visible_to(current_user))
   end
 
   # GET /recipes/1 or /recipes/1.json
   def show
+  end
+
+  # GET /recipes/1/print
+  def print
+    render "recipes/print", layout: "print"
   end
 
   # GET /recipes/new
@@ -27,6 +32,7 @@ class RecipesController < ApplicationController
   # POST /recipes or /recipes.json
   def create
     @recipe = Recipe.new(recipe_params)
+    @recipe.user = current_user
 
     respond_to do |format|
       if @recipe.save
@@ -71,8 +77,10 @@ class RecipesController < ApplicationController
     @searched = @query.present? || @ingredient.present? || @selected_category_ids.any?
 
     if @searched
+      # visible_to first so the search only ever ranges over recipes this user
+      # is allowed to see; Recipe.search builds from `all`, so it composes.
       @pagy, @recipes = paginate_recipes(
-        Recipe.search(
+        Recipe.visible_to(current_user).search(
           @query,
           category_ids: @selected_category_ids,
           ingredient: @ingredient,
@@ -98,8 +106,10 @@ class RecipesController < ApplicationController
     end
 
     # Use callbacks to share common setup or constraints between actions.
+    # Private recipes are only reachable by their owner — enforced here rather
+    # than in the view so no action can leak one.
     def set_recipe
-      @recipe = Recipe.find(params.expect(:id))
+      @recipe = Recipe.visible_to(current_user).find(params.expect(:id))
     end
 
     # Only allow a list of trusted parameters through.
@@ -112,8 +122,12 @@ class RecipesController < ApplicationController
     :prep_time,
     :category_id,
     :image,
+    :visibility,
     ingredients: [ :name, :quantity, :unit ] # Nested attribute for ingredients
   )
+
+  # Only the owner may flip an existing recipe between public and private.
+  permitted_params.delete(:visibility) if @recipe.present? && !@recipe.editable_by?(current_user)
 
   # Manually handle nutrition fields
   permitted_params[:nutrition] = {

@@ -1,0 +1,35 @@
+<% content_for :title, "Your favorite recipes" %>
+
+<div class="w-full">
+  <% if notice.present? %>
+    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
+  <% end %>
+
+  <h1 class="text-2xl font-bold text-gray-900">Your favorite recipes</h1>
+  <p class="mt-1 text-sm text-gray-500">
+    Favorites are bookmarks. They are separate from your saved recipes, which feed your shopping list and meal plans.
+  </p>
+
+  <% if @recipes.any? %>
+    <ul class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <% @recipes.each do |recipe| %>
+        <li class="rounded-lg bg-white shadow p-4">
+          <% if recipe.image.attached? %>
+            <%= image_tag recipe.image.variant(resize_to_limit: [ 400, 300 ]), class: "rounded-md object-cover w-full h-40" %>
+          <% end %>
+          <h2 class="mt-3 text-lg font-semibold text-gray-900">
+            <%= link_to recipe.title, recipe, class: "hover:text-indigo-600" %>
+          </h2>
+          <p class="mt-1 text-sm text-gray-500"><%= recipe.category.name %></p>
+          <div class="mt-3">
+            <%= render "recipes/favorite_button", recipe: recipe %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="mt-6 text-gray-500">
+      You have not favorited any recipes yet. <%= link_to "Browse recipes", recipes_path, class: "text-indigo-600 underline" %>.
+    </p>
+  <% end %>
+</div>

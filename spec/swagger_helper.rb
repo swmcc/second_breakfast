@@ -85,6 +85,10 @@ RSpec.configure do |config|
                 }
               },
               image_url: { type: :string, nullable: true },
+              visibility: { type: :string, enum: [ "public", "private" ] },
+              share_url: { type: :string },
+              average_rating: { type: :number, nullable: true },
+              ratings_count: { type: :integer },
               created_at: { type: :string, format: "date-time" },
               updated_at: { type: :string, format: "date-time" }
             }

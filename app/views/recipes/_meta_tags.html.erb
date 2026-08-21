@@ -1,0 +1,28 @@
+<%# Open Graph / Twitter card tags. Public recipes only — a private recipe
+    should never be advertised to crawlers or unfurlers. %>
+<% share_url = recipe_share_url(recipe) %>
+<% image_url = recipe_share_image_url(recipe) %>
+
+<% if recipe.public_recipe? %>
+  <meta name="description" content="<%= truncate(recipe.description.to_s, length: 200) %>">
+  <link rel="canonical" href="<%= share_url %>">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Second Breakfast">
+  <meta property="og:title" content="<%= recipe.title %>">
+  <meta property="og:description" content="<%= truncate(recipe.description.to_s, length: 200) %>">
+  <meta property="og:url" content="<%= share_url %>">
+  <% if image_url.present? %>
+    <meta property="og:image" content="<%= image_url %>">
+    <meta property="og:image:alt" content="<%= recipe.title %>">
+  <% end %>
+
+  <meta name="twitter:card" content="<%= image_url.present? ? "summary_large_image" : "summary" %>">
+  <meta name="twitter:title" content="<%= recipe.title %>">
+  <meta name="twitter:description" content="<%= truncate(recipe.description.to_s, length: 200) %>">
+  <% if image_url.present? %>
+    <meta name="twitter:image" content="<%= image_url %>">
+  <% end %>
+<% else %>
+  <meta name="robots" content="noindex, nofollow">
+<% end %>
