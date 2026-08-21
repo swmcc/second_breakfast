@@ -1,12 +1,31 @@
 default: &default
   store_options:
-    # Cap age of oldest cache entry to fulfill retention policies
-    # max_age: <%= 60.days.to_i %>
+    # Cache expiration policy.
+    #
+    # Every fragment key in this app carries a record (or collection) version,
+    # so entries are never *served* stale - they simply stop being addressed
+    # once the underlying record changes. max_age and max_size therefore exist
+    # to stop those orphaned entries accumulating, not to bound correctness.
+    #
+    # Cap the age of the oldest cache entry. Two weeks is comfortably longer
+    # than any fragment stays useful, and short enough that a burst of recipe
+    # edits cannot leave months of dead rows behind.
+    max_age: <%= 14.days.to_i %>
+    # Cap total size of the cache table. Solid Cache trims the least recently
+    # written entries once either bound is exceeded.
     max_size: <%= 256.megabytes %>
+    # Number of expired entries removed per expiry pass, and how often a write
+    # triggers one (1 in 50 writes by default).
+    expiry_batch_size: 500
     namespace: <%= Rails.env %>
 
 development:
   <<: *default
+  store_options:
+    max_age: <%= 1.day.to_i %>
+    max_size: <%= 32.megabytes %>
+    expiry_batch_size: 100
+    namespace: <%= Rails.env %>
 
 test:
   <<: *default

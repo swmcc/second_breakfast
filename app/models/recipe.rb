@@ -1,5 +1,7 @@
 class Recipe < ApplicationRecord
-  belongs_to :category
+  # touch: true so a recipe change busts any fragment cached against its
+  # category (the categories index lists each category's recipes).
+  belongs_to :category, touch: true
 
   has_many :baskets, dependent: :destroy
   has_many :users, through: :baskets
