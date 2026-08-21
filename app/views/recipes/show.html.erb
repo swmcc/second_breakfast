@@ -1,8 +1,24 @@
-<% content_for :title, "Showing recipe" %>
+<% content_for :title, @recipe.title %>
+<% content_for :head do %>
+  <%= render "recipes/meta_tags", recipe: @recipe %>
+<% end %>
 
 <div class="md:w-2/3 w-full">
   <% if notice.present? %>
     <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
+  <% end %>
+
+  <% if alert.present? %>
+    <p class="py-2 px-3 bg-red-50 mb-5 text-red-600 font-medium rounded-md inline-block" id="alert"><%= alert %></p>
+  <% end %>
+
+  <% if @recipe.private_recipe? %>
+    <p class="py-2 px-3 bg-amber-50 mb-5 text-amber-800 font-medium rounded-md inline-flex items-center gap-2" id="visibility-notice">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+      </svg>
+      Private recipe — only you can see this page.
+    </p>
   <% end %>
 
   <%= render @recipe %>
@@ -24,6 +40,8 @@
         <span>Save Recipe</span>
       <% end %>
     <% end %>
+
+    <%= render "recipes/favorite_button", recipe: @recipe %>
   <% end %>
 
     <% if signed_in? %>
@@ -48,5 +66,11 @@
       </svg>
       Back to Recipes
     <% end %>
+  </div>
+
+  <div class="mt-8 space-y-8">
+    <%= render "recipes/share", recipe: @recipe, print_url: print_recipe_path(@recipe) %>
+    <%= render "recipes/ratings", recipe: @recipe %>
+    <%= render "recipes/reviews", recipe: @recipe %>
   </div>
 </div>

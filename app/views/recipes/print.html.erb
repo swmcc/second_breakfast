@@ -1,0 +1,74 @@
+<% content_for :title, "#{@recipe.title} — Second Breakfast" %>
+
+<article class="bg-white text-gray-900 print:text-black">
+  <div class="flex items-start justify-between gap-6 print:hidden">
+    <p class="text-sm text-gray-500">Print preview</p>
+    <div class="flex gap-3" data-controller="print">
+      <button type="button"
+              data-action="print#print"
+              class="rounded-md px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm">
+        Print this recipe
+      </button>
+      <%= link_to "Back", @shared ? shared_recipe_path(@recipe.public_token) : recipe_path(@recipe),
+          class: "rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm" %>
+    </div>
+  </div>
+
+  <header class="mt-6 print:mt-0 border-b border-gray-300 pb-4">
+    <h1 class="text-3xl font-bold print:text-2xl"><%= @recipe.title %></h1>
+    <p class="mt-2 text-gray-700 print:text-sm"><%= @recipe.description %></p>
+
+    <dl class="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm">
+      <div>
+        <dt class="inline font-semibold">Serves:</dt>
+        <dd class="inline"><%= @recipe.serves %></dd>
+      </div>
+      <div>
+        <dt class="inline font-semibold">Prep time:</dt>
+        <dd class="inline"><%= @recipe.prep_time %></dd>
+      </div>
+      <div>
+        <dt class="inline font-semibold">Category:</dt>
+        <dd class="inline"><%= @recipe.category.name %></dd>
+      </div>
+    </dl>
+  </header>
+
+  <section class="mt-6 break-inside-avoid">
+    <h2 class="text-xl font-semibold print:text-lg">Ingredients</h2>
+    <ul class="mt-3 space-y-1 text-sm">
+      <% if @recipe.ingredients.present? %>
+        <% @recipe.ingredients.each do |ingredient| %>
+          <li class="flex gap-3 border-b border-dotted border-gray-300 py-1">
+            <span class="w-32 shrink-0 font-medium"><%= ingredient["quantity"] %> <%= ingredient["unit"] %></span>
+            <span><%= ingredient["name"] %></span>
+          </li>
+        <% end %>
+      <% end %>
+    </ul>
+  </section>
+
+  <section class="mt-6">
+    <h2 class="text-xl font-semibold print:text-lg">Instructions</h2>
+    <div class="prose prose-sm max-w-none mt-3 text-sm"><%= @recipe.instructions %></div>
+  </section>
+
+  <% if @recipe.nutrition.present? %>
+    <section class="mt-6 break-inside-avoid">
+      <h2 class="text-xl font-semibold print:text-lg">Nutrition (per serving)</h2>
+      <ul class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+        <% { "calories" => "Calories", "protein" => "Protein", "fat" => "Fat", "carbs" => "Carbs",
+             "fibre" => "Fibre", "sugar" => "Sugar", "sodium" => "Sodium" }.each do |key, label| %>
+          <li class="border border-gray-300 rounded px-2 py-1">
+            <span class="block text-gray-500"><%= label %></span>
+            <span class="font-medium"><%= @recipe.nutrition[key] %></span>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <footer class="mt-8 border-t border-gray-300 pt-3 text-xs text-gray-500">
+    Second Breakfast &middot; <%= recipe_share_url(@recipe) %>
+  </footer>
+</article>

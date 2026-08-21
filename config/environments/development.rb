@@ -47,6 +47,11 @@ Rails.application.configure do
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
+  # Logs stay human-readable locally. Set RAILS_LOG_FORMAT=json to preview the
+  # production JSON formatter (it then logs to STDOUT, like production does).
+  config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "debug")
+  config.logger = Observability.build_logger($stdout) if Observability.json_logging?
+
   # Raise an error on page load if there are pending migrations.
   config.active_record.migration_error = :page_load
 

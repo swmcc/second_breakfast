@@ -16,10 +16,6 @@ RSpec.describe "Fragment caching", :caching, type: :request do
     keys
   end
 
-  def search_cache_writes(keys)
-    keys.select { |key| key.to_s.start_with?("recipes/search") }
-  end
-
   describe "recipes index" do
     let!(:category) { create(:category, name: "Brunch") }
     let!(:recipe) { create(:recipe, title: "Original Pancakes", category: category) }
@@ -144,18 +140,11 @@ RSpec.describe "Fragment caching", :caching, type: :request do
     let!(:category) { create(:category) }
     let!(:recipe) { create(:recipe, title: "Blueberry Pancakes", category: category) }
 
-    it "caches the matching ids and reuses them for an equivalent query string" do
-      keys = capture_cache_writes { get search_recipes_path(query: "pancakes") }
-      expect(response.body).to include("Blueberry Pancakes")
-      expect(search_cache_writes(keys)).not_to be_empty
-
-      # Same query once normalised (trimmed, downcased, inner runs of spaces
-      # collapsed) - served from the existing entry, so nothing is written.
-      keys = capture_cache_writes { get search_recipes_path(query: "  PANCAKES  ") }
-      expect(response.body).to include("Blueberry Pancakes")
-      expect(search_cache_writes(keys)).to be_empty
-    end
-
+    # Search-result id caching was removed when Postgres full-text search
+    # (issue #65) landed: the query is index-backed and fast, and a cache keyed
+    # on the query alone would have been shared across users, leaking recipes
+    # that Recipe.visible_to (issue #66) excludes. The search itself is still
+    # covered here so a regression in results is caught.
     it "invalidates when the recipe collection changes" do
       get search_recipes_path(query: "pancakes")
       expect(response.body).not_to include("Buttermilk Pancakes")
@@ -164,14 +153,6 @@ RSpec.describe "Fragment caching", :caching, type: :request do
 
       get search_recipes_path(query: "pancakes")
       expect(response.body).to include("Buttermilk Pancakes")
-    end
-
-    it "does not cache the rendered page, only the ids" do
-      keys = capture_cache_writes { get search_recipes_path(query: "pancakes") }
-      cached = search_cache_writes(keys)
-
-      expect(cached.size).to eq(1)
-      expect(Rails.cache.read(cached.first)).to eq([ recipe.id ])
     end
   end
 end

@@ -7,6 +7,11 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "⬆️"
+    ignore:
+      # Pinned to pagy 9.x on purpose - v43 is a full API redesign.
+      # See UPGRADE_NOTES.md and issue #124 before lifting this.
+      - dependency-name: "pagy"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: "/"

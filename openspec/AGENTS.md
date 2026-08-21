@@ -135,19 +135,25 @@ end
 
 ### Search Implementation
 
-Recipe search supports title and ingredient search:
+Recipe search is Postgres full-text search and lives in the `Recipe` model, not
+the controller. `recipes.searchable` is a stored, generated `tsvector` column
+(title A, description B, ingredient names C, instructions D) with a GIN index;
+the ActionText instructions body has its own GIN expression index on
+`action_text_rich_texts`.
 
 ```ruby
-def search
-  if params[:query].present?
-    query = "%#{params[:query]}%"
-    @recipes = Recipe.where(
-      "LOWER(title) LIKE LOWER(?) OR LOWER(ingredients::text) LIKE LOWER(?)",
-      query, query
-    )
-  end
-end
+# Returns an ActiveRecord::Relation, so it stays paginatable.
+Recipe.search(
+  params[:query],
+  category_ids: params[:category_ids],  # multi-select filter
+  ingredient: params[:ingredient],      # matches ingredient names only
+  sort: params[:sort]                   # relevance | newest | alphabetical
+)
 ```
+
+`sort` is whitelisted against `Recipe::SORT_OPTIONS` and never interpolated
+into SQL; it defaults to relevance when a query is present and newest
+otherwise.
 
 ### Testing Patterns
 
