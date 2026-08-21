@@ -26,7 +26,7 @@ gem "rswag-api"
 gem "rswag-ui"
 
 # Pagination
-gem "pagy", "~> 9.0"
+gem "pagy", "~> 9.4"
 
 # CORS support
 gem "rack-cors"
