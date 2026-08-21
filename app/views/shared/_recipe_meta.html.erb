@@ -1,0 +1,31 @@
+<%# Cooking time and portion size for a recipe, as a definition list so the %>
+<%# labels stay available to screen readers even though they are visually %>
+<%# reduced to icons. Locals: recipe, and an optional size of :sm or :lg. %>
+<%# There is no `difficulty` column on recipes, so difficulty is not shown %>
+<%# here (see issue #72) -- this displays what the schema actually has. %>
+<% size = local_assigns.fetch(:size, :sm) %>
+<dl class="flex flex-wrap items-center gap-x-4 gap-y-1 <%= size == :lg ? "text-base" : "text-sm" %> text-gray-600">
+  <% if recipe.prep_time.present? %>
+    <div class="flex items-center gap-x-1.5">
+      <dt class="flex items-center">
+        <span class="sr-only">Prep time</span>
+        <svg class="h-4 w-4 flex-none text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </dt>
+      <dd><%= recipe.prep_time %></dd>
+    </div>
+  <% end %>
+
+  <% if recipe.serves.present? %>
+    <div class="flex items-center gap-x-1.5">
+      <dt class="flex items-center">
+        <span class="sr-only">Serves</span>
+        <svg class="h-4 w-4 flex-none text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+        </svg>
+      </dt>
+      <dd>Serves <%= recipe.serves %></dd>
+    </div>
+  <% end %>
+</dl>

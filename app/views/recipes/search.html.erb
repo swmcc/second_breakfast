@@ -1,4 +1,5 @@
-<% content_for :title, "Search recipes" %>
+<% content_for :title, "Search recipes | Second Breakfast" %>
+<% breadcrumbs [ "Recipes", recipes_path ], [ "Search" ] %>
 
 <div class="w-full">
   <h1 class="font-bold text-4xl mb-6">Search recipes</h1>
@@ -10,7 +11,7 @@
         <%= text_field_tag :query, @query,
               placeholder: "e.g. fluffy pancakes",
               class: "mt-2 block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm" %>
-        <p class="mt-1 text-xs text-gray-500">Searches titles, descriptions, ingredients and instructions.</p>
+        <p class="mt-1 text-xs text-gray-600">Searches titles, descriptions, ingredients and instructions.</p>
       </div>
 
       <div>
@@ -18,7 +19,7 @@
         <%= text_field_tag :ingredient, @ingredient,
               placeholder: "e.g. eggs",
               class: "mt-2 block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm" %>
-        <p class="mt-1 text-xs text-gray-500">Matches ingredient names only.</p>
+        <p class="mt-1 text-xs text-gray-600">Matches ingredient names only.</p>
       </div>
 
       <div>
@@ -57,24 +58,24 @@
 
   <% if @searched %>
     <% if @recipes.any? %>
-      <p class="text-sm text-gray-500 mb-4"><%= pluralize(@recipes.size, "recipe") %> found.</p>
+      <p class="text-sm text-gray-700 mb-4" role="status"><%= pluralize(@recipes.size, "recipe") %> found.</p>
       <div class="mb-8">
-        <ul class="space-y-6">
+        <ul role="list" class="space-y-6">
           <% @recipes.each do |recipe| %>
             <li class="border-b pb-4 flex flex-col sm:flex-row items-start space-x-4">
               <!-- Thumbnail Image -->
               <% if recipe.image.attached? %>
                 <%= link_to recipe_path(recipe), class: "flex-shrink-0" do %>
-                  <%= image_tag recipe.image.variant(resize_to_fill: [150, 150]), class: "w-36 h-36 object-cover rounded-md" %>
+                  <%= image_tag recipe.image.variant(resize_to_fill: [ 150, 150 ]), alt: "Photograph of #{recipe.title}", class: "w-36 h-36 object-cover rounded-md" %>
                 <% end %>
               <% else %>
-                <div class="w-36 h-36 bg-gray-200 rounded-md"></div>
+                <div class="w-36 h-36 flex-shrink-0 bg-gray-100 rounded-md" aria-hidden="true"></div>
               <% end %>
 
               <!-- Recipe Info (Title, Description, Ingredients) -->
               <div class="flex-grow">
                 <div>
-                  <%= link_to recipe_path(recipe), class: "text-lg font-semibold text-blue-600 hover:underline" do %>
+                  <%= link_to recipe_path(recipe), class: "text-lg font-semibold text-blue-700 hover:underline" do %>
                     <%= recipe.title %>
                   <% end %>
                 </div>

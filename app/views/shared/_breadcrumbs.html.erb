@@ -1,0 +1,26 @@
+<%# Renders a breadcrumb trail. Views declare one through the ApplicationHelper %>
+<%# `breadcrumbs` helper rather than rendering this partial directly. %>
+<%# Each crumb is a [label, path] pair; a crumb with no path -- normally the %>
+<%# last -- is rendered as the current page instead of a link. %>
+<% crumbs = Array(crumbs).compact_blank %>
+<% if crumbs.any? %>
+  <nav aria-label="Breadcrumb">
+    <ol role="list" class="flex flex-wrap items-center gap-x-1 text-sm text-gray-600">
+      <li class="flex items-center">
+        <%= link_to "Home", root_path, class: "inline-flex min-h-11 items-center rounded px-1 hover:text-gray-900 hover:underline" %>
+      </li>
+      <% crumbs.each_with_index do |(label, path), index| %>
+        <li class="flex items-center">
+          <svg class="h-4 w-4 flex-none text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 010-1.06z" clip-rule="evenodd" />
+          </svg>
+          <% if path.present? && index < crumbs.length - 1 %>
+            <%= link_to label, path, class: "inline-flex min-h-11 items-center rounded px-1 hover:text-gray-900 hover:underline" %>
+          <% else %>
+            <span class="inline-flex min-h-11 items-center px-1 font-medium text-gray-900" aria-current="page"><%= label %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+  </nav>
+<% end %>

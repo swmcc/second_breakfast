@@ -10,7 +10,6 @@
     At least <%= User::MINIMUM_PASSWORD_LENGTH %> characters. Setting a new password signs you out everywhere else.
   </p>
 
-  <%= render "shared/auth_flash" %>
 
   <div class="mt-10">
     <%= form_with(url: password_reset_path(token: params[:token]), method: :patch, local: true, class: "space-y-6") do |form| %>

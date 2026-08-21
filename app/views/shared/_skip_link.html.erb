@@ -1,0 +1,10 @@
+<%#
+  First focusable thing on the page. Visually hidden until it takes focus,
+  then it parks itself over the header so keyboard users can jump the nav.
+%>
+<a href="#main-content"
+   data-controller="skip-link"
+   data-action="skip-link#jump"
+   class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-md focus:bg-indigo-700 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg">
+  Skip to main content
+</a>

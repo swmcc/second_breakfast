@@ -1,3 +1,81 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /*
+   * A single, predictable focus ring for everything that can be focused.
+   * `:focus-visible` keeps it off for mouse users but always on for keyboards.
+   */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid theme("colors.indigo.700");
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+  }
+
+  /* Never strip the ring without putting something back. */
+  :where(a, button, input, select, textarea):focus {
+    outline-color: theme("colors.indigo.700");
+  }
+
+  /* Anchored jumps (skip link, breadcrumb targets) should not land under the sticky header. */
+  :where(html) {
+    scroll-padding-top: 8rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /*
+   * Turbo drives every navigation, so its progress bar is the app's main
+   * "something is happening" signal. Tint it to match the plate logo.
+   */
+  .turbo-progress-bar {
+    height: 3px;
+    background: linear-gradient(
+      to right,
+      theme("colors.indigo.500"),
+      theme("colors.indigo.700")
+    );
+  }
+
+  /* Anything mid-request dims slightly and stops accepting pointer input. */
+  [aria-busy="true"] {
+    cursor: progress;
+  }
+
+  [aria-busy="true"]:where(button, input[type="submit"], [role="button"]) {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .spinner {
+    animation: sb-spin 0.7s linear infinite;
+  }
+
+  @keyframes sb-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /*
+     * A sticky header that re-renders on every scroll frame is exactly the
+     * kind of motion this preference is asking us to stop.
+     */
+    .sb-sticky-header {
+      position: static;
+    }
+  }
+}

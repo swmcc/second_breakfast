@@ -1,9 +1,10 @@
 <% content_for :title, "New category" %>
+<% breadcrumbs [ "Categories", categories_path ], [ "New category" ] %>
 
-<div class="md:w-2/3 w-full">
-  <h1 class="font-bold text-4xl">New category</h1>
+<div class="w-full max-w-3xl">
+  <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">New category</h1>
 
   <%= render "form", category: @category %>
 
-  <%= link_to "Back to categories", categories_path, class: "ml-2 rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
+  <%= link_to "Back to categories", categories_path, class: "mt-4 mr-2 rounded-md px-3.5 py-2.5 min-h-11 bg-gray-100 hover:bg-gray-200 text-gray-800 inline-flex items-center font-medium" %>
 </div>

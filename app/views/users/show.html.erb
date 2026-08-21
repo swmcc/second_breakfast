@@ -4,7 +4,6 @@
   <h1 class="text-3xl font-bold tracking-tight text-gray-900">Account</h1>
   <p class="mt-2 text-gray-600">Manage a copy of your data or permanently remove your account.</p>
 
-  <%= render "shared/auth_flash" %>
 
   <% unless current_user.confirmed? %>
     <div class="mt-6 rounded-md border border-amber-200 bg-amber-50 p-4" role="status">

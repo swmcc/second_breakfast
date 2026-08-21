@@ -1,66 +1,64 @@
 <%= form_with(model: recipe, class: "contents") do |form| %>
-  <% if recipe.errors.any? %>
-    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
-      <h2><%= pluralize(recipe.errors.count, "error") %> prohibited this recipe from being saved:</h2>
-
-      <ul class="list-disc ml-6">
-        <% recipe.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
+  <%= render "shared/error_summary", object: recipe, noun: "recipe" %>
 
   <!-- Title Field -->
   <div class="my-5">
-    <%= form.label :title %>
-    <%= form.text_field :title, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
+    <%= form.label :title, class: "block text-sm font-medium text-gray-900" %>
+    <%= form.text_field :title, class: "block shadow rounded-md border px-3 py-2 mt-2 w-full #{field_border_classes(recipe, :title)}", **field_error_attributes(recipe, :title) %>
+    <%= render "shared/field_error", object: recipe, attribute: :title %>
   </div>
 
   <div class="my-5">
-  <%= form.label :category_id, "Category" %>
-  <%= form.collection_select :category_id, Category.cached_list, :id, :name, prompt: "Select a category", class: "block shadow rounded-md border px-3 py-2 mt-2 w-full" %>
+  <%= form.label :category_id, "Category", class: "block text-sm font-medium text-gray-900" %>
+  <%= form.collection_select :category_id, Category.cached_list, :id, :name, { prompt: "Select a category" }, { class: "block shadow rounded-md border px-3 py-2 mt-2 w-full #{field_border_classes(recipe, :category)}", **field_error_attributes(recipe, :category) } %>
+  <%= render "shared/field_error", object: recipe, attribute: :category %>
   </div>
 
   <div class="my-5">
-    <%= form.label :visibility, "Visibility" %>
+    <%= form.label :visibility, "Visibility", class: "block text-sm font-medium text-gray-900" %>
     <%= form.select :visibility, recipe_visibility_options, {}, class: "block shadow rounded-md border px-3 py-2 mt-2 w-full" %>
-    <p class="mt-1 text-sm text-gray-500">
+    <p class="mt-1 text-sm text-gray-600">
       Private recipes are only readable by you &mdash; but anyone you hand the share link to can still read them.
     </p>
   </div>
 
   <!-- Description Field -->
   <div class="my-5">
-    <%= form.label :description %>
-    <%= form.text_area :description, rows: 4, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
+    <%= form.label :description, class: "block text-sm font-medium text-gray-900" %>
+    <%= form.text_area :description, rows: 4, class: "block shadow rounded-md border px-3 py-2 mt-2 w-full #{field_border_classes(recipe, :description)}", **field_error_attributes(recipe, :description) %>
+    <%= render "shared/field_error", object: recipe, attribute: :description %>
   </div>
   <div class="my-5">
-  <%= form.label :serves %>
-  <%= form.number_field :serves, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
+  <%= form.label :serves, class: "block text-sm font-medium text-gray-900" %>
+  <%= form.number_field :serves, min: 1, class: "block shadow rounded-md border px-3 py-2 mt-2 w-full #{field_border_classes(recipe, :serves)}", **field_error_attributes(recipe, :serves) %>
+  <%= render "shared/field_error", object: recipe, attribute: :serves %>
 </div>
 
 <div class="my-5">
-  <%= form.label :image, "Upload Image" %>
-  <%= form.file_field :image, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
+  <%= form.label :image, "Upload Image", class: "block text-sm font-medium text-gray-900" %>
+  <%= form.file_field :image, accept: "image/png,image/jpeg,image/webp,image/gif", class: "block shadow rounded-md border px-3 py-2 mt-2 w-full #{field_border_classes(recipe, :image)}", **field_error_attributes(recipe, :image) %>
+  <p class="mt-1 text-sm text-gray-600">PNG, JPEG, WebP or GIF, up to 5&nbsp;MB.</p>
+  <%= render "shared/field_error", object: recipe, attribute: :image %>
 </div>
 
 <div class="my-5">
-  <%= form.label :instructions %>
-  <%= form.rich_text_area :instructions, rows: 4, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
+  <%= form.label :instructions, class: "block text-sm font-medium text-gray-900" %>
+  <%= form.rich_text_area :instructions, rows: 4, class: "block shadow rounded-md border px-3 py-2 mt-2 w-full #{field_border_classes(recipe, :instructions)}", **field_error_attributes(recipe, :instructions) %>
+  <%= render "shared/field_error", object: recipe, attribute: :instructions %>
 </div>
 
   <!-- Ingredients Section -->
   <div class="my-5" data-controller="ingredients">
-    <%= form.label :ingredients %>
+    <%= form.label :ingredients, class: "block text-sm font-medium text-gray-900" %>
+    <%= render "shared/field_error", object: recipe, attribute: :ingredients %>
     <div id="ingredients" class="mt-2" data-ingredients-target="list">
       <!-- Template for new ingredients -->
       <template data-ingredients-target="template">
         <div class="flex gap-2 mb-2">
-          <input type="text" name="recipe[ingredients][][name]" placeholder="Name" class="shadow rounded-md border px-3 py-2 flex-grow">
-          <input type="number" name="recipe[ingredients][][quantity]" placeholder="Quantity" class="shadow rounded-md border px-3 py-2 w-24">
-          <input type="text" name="recipe[ingredients][][unit]" placeholder="Unit" class="shadow rounded-md border px-3 py-2 w-24">
-          <button type="button" data-action="ingredients#remove" class="px-3 py-2 bg-red-600 text-white rounded-md">Remove</button>
+          <input type="text" name="recipe[ingredients][][name]" aria-label="Ingredient name" placeholder="Name" class="shadow rounded-md border px-3 py-2 flex-grow">
+          <input type="number" name="recipe[ingredients][][quantity]" aria-label="Ingredient quantity" placeholder="Quantity" class="shadow rounded-md border px-3 py-2 w-24">
+          <input type="text" name="recipe[ingredients][][unit]" aria-label="Ingredient unit" placeholder="Unit" class="shadow rounded-md border px-3 py-2 w-24">
+          <button type="button" data-action="ingredients#remove" class="min-h-11 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md">Remove<span class="sr-only"> ingredient</span></button>
         </div>
       </template>
 
@@ -68,57 +66,59 @@
       <% if recipe.ingredients.present? && recipe.ingredients.any? %>
         <% recipe.ingredients.each do |ingredient| %>
           <div class="flex gap-2 mb-2">
-            <input type="text" name="recipe[ingredients][][name]" value="<%= ingredient['name'] %>" placeholder="Name" class="shadow rounded-md border px-3 py-2 flex-grow">
-            <input type="number" name="recipe[ingredients][][quantity]" value="<%= ingredient['quantity'] %>" placeholder="Quantity" class="shadow rounded-md border px-3 py-2 w-24">
-            <input type="text" name="recipe[ingredients][][unit]" value="<%= ingredient['unit'] %>" placeholder="Unit" class="shadow rounded-md border px-3 py-2 w-24">
-            <button type="button" data-action="ingredients#remove" class="px-3 py-2 bg-red-600 text-white rounded-md">Remove</button>
+            <input type="text" name="recipe[ingredients][][name]" value="<%= ingredient['name'] %>" aria-label="Ingredient name" placeholder="Name" class="shadow rounded-md border px-3 py-2 flex-grow">
+            <input type="number" name="recipe[ingredients][][quantity]" value="<%= ingredient['quantity'] %>" aria-label="Ingredient quantity" placeholder="Quantity" class="shadow rounded-md border px-3 py-2 w-24">
+            <input type="text" name="recipe[ingredients][][unit]" value="<%= ingredient['unit'] %>" aria-label="Ingredient unit" placeholder="Unit" class="shadow rounded-md border px-3 py-2 w-24">
+            <button type="button" data-action="ingredients#remove" class="min-h-11 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md">Remove<span class="sr-only"> ingredient</span></button>
           </div>
         <% end %>
       <% end %>
     </div>
 
     <!-- Add Ingredient Button -->
-    <button type="button" data-action="ingredients#add" class="mt-2 px-3 py-2 bg-green-600 text-white rounded-md">Add Ingredient</button>
+    <button type="button" data-action="ingredients#add" class="mt-2 min-h-11 px-3 py-2 bg-green-700 hover:bg-green-800 text-white rounded-md">Add Ingredient</button>
   </div>
 
   <!-- Other Fields (Prep Time, Nutrition, etc.) -->
   <div class="my-5">
-    <%= form.label :prep_time %>
-    <%= form.text_field :prep_time, class: "block shadow rounded-md border outline-none px-3 py-2 mt-2 w-full" %>
+    <%= form.label :prep_time, class: "block text-sm font-medium text-gray-900" %>
+    <%= form.text_field :prep_time, placeholder: "e.g. 25 minutes", class: "block shadow rounded-md border px-3 py-2 mt-2 w-full #{field_border_classes(recipe, :prep_time)}", **field_error_attributes(recipe, :prep_time) %>
+    <%= render "shared/field_error", object: recipe, attribute: :prep_time %>
   </div>
 
   <%# Helper to extract numeric value from nutrition fields (handles "7g", "200mg", etc.) %>
   <% extract_number = ->(val) { val.to_s.gsub(/[^\d.]/, '').presence } %>
 
   <div class="my-5">
-  <%= form.label :nutrition, "Nutrition Details" %>
+  <%= form.label :nutrition, "Nutrition Details", class: "block text-sm font-medium text-gray-900" %>
+  <%= render "shared/field_error", object: recipe, attribute: :nutrition %>
   <div id="nutrition-fields" class="mt-2 grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
     <div>
-      <%= form.label :nutrition_calories, "Calories (kcal)" %>
+      <%= form.label :nutrition_calories, "Calories (kcal)", class: "block text-sm font-medium text-gray-900" %>
       <%= form.number_field :nutrition_calories, step: 1, value: extract_number.call(recipe.nutrition&.dig("calories")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
-      <%= form.label :nutrition_protein, "Protein (g)" %>
+      <%= form.label :nutrition_protein, "Protein (g)", class: "block text-sm font-medium text-gray-900" %>
       <%= form.number_field :nutrition_protein, step: 0.1, value: extract_number.call(recipe.nutrition&.dig("protein")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
-      <%= form.label :nutrition_fat, "Fat (g)" %>
+      <%= form.label :nutrition_fat, "Fat (g)", class: "block text-sm font-medium text-gray-900" %>
       <%= form.number_field :nutrition_fat, step: 0.1, value: extract_number.call(recipe.nutrition&.dig("fat")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
-      <%= form.label :nutrition_carbs, "Carbohydrates (g)" %>
+      <%= form.label :nutrition_carbs, "Carbohydrates (g)", class: "block text-sm font-medium text-gray-900" %>
       <%= form.number_field :nutrition_carbs, step: 0.1, value: extract_number.call(recipe.nutrition&.dig("carbs")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
-      <%= form.label :nutrition_fibre, "Fibre (g)" %>
+      <%= form.label :nutrition_fibre, "Fibre (g)", class: "block text-sm font-medium text-gray-900" %>
       <%= form.number_field :nutrition_fibre, step: 0.1, value: extract_number.call(recipe.nutrition&.dig("fibre")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
-      <%= form.label :nutrition_sugar, "Sugar (g)" %>
+      <%= form.label :nutrition_sugar, "Sugar (g)", class: "block text-sm font-medium text-gray-900" %>
       <%= form.number_field :nutrition_sugar, step: 0.1, value: extract_number.call(recipe.nutrition&.dig("sugar")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
     <div>
-      <%= form.label :nutrition_sodium, "Sodium (mg)" %>
+      <%= form.label :nutrition_sodium, "Sodium (mg)", class: "block text-sm font-medium text-gray-900" %>
       <%= form.number_field :nutrition_sodium, step: 1, value: extract_number.call(recipe.nutrition&.dig("sodium")), class: "shadow rounded-md border px-3 py-2 w-full" %>
     </div>
   </div>
@@ -126,6 +126,6 @@
 
   <!-- Submit Button -->
   <div class="inline">
-    <%= form.submit class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium cursor-pointer mt-6" %>
+    <%= form.submit class: "rounded-md min-h-11 px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium cursor-pointer mt-6" %>
   </div>
 <% end %>

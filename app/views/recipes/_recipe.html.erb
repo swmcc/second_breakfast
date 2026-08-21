@@ -4,36 +4,35 @@
     instructions or swapping the image busts this too. Nothing user specific is
     rendered here - the Save/Edit/Delete buttons live in recipes/show. %>
 <% cache [ "recipes/recipe", recipe, recipe.category ] do %>
-<div id="<%= dom_id recipe %>" class="max-w-7xl mx-auto bg-white rounded-lg shadow p-8">
+<article id="<%= dom_id recipe %>" class="max-w-7xl mx-auto bg-white rounded-lg shadow ring-1 ring-gray-900/5 p-5 sm:p-8">
   <div class="space-y-8">
     <div class="flex justify-between items-center">
       <div>
-        <h2 class="text-3xl font-bold text-gray-900"><%= recipe.title %></h2>
-        <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"><%= recipe.category.name %></span>
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900"><%= recipe.title %></h1>
+        <span class="mt-2 inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-700/30"><%= recipe.category.name %></span>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div>
-        <% if recipe.image.attached? %>
-          <div class="aspect-w-16 aspect-h-9">
-            <%= image_tag recipe.image.variant(resize_to_limit: [600, 600]), class: "rounded-lg object-cover w-full h-96" %>
-          </div>
-        <% end %>
-      </div>
+    <%# Without a photo the two-column grid left half the card empty. %>
+    <div class="grid grid-cols-1 gap-8 <%= "md:grid-cols-2" if recipe.image.attached? %>">
+      <% if recipe.image.attached? %>
+        <div>
+          <%= image_tag recipe.image.variant(resize_to_limit: [ 600, 600 ]), alt: "Photograph of #{recipe.title}", class: "rounded-lg object-cover w-full h-64 sm:h-96" %>
+        </div>
+      <% end %>
 
       <div class="space-y-6">
-        <div class="text-gray-600">
+        <div class="text-gray-700">
           <p class="text-lg leading-relaxed"><%= recipe.description %></p>
         </div>
 
         <div class="grid grid-cols-2 gap-6 text-base">
           <div class="bg-gray-50 rounded-lg p-4">
-            <span class="block text-gray-500">Serves</span>
+            <span class="block text-gray-600">Serves</span>
             <span class="font-medium text-gray-900 text-lg"><%= recipe.serves %> people</span>
           </div>
           <div class="bg-gray-50 rounded-lg p-4">
-            <span class="block text-gray-500">Prep Time</span>
+            <span class="block text-gray-600">Prep Time</span>
             <span class="font-medium text-gray-900 text-lg"><%= recipe.prep_time %></span>
           </div>
         </div>
@@ -43,17 +42,17 @@
     <div class="grid grid-cols-1 gap-8">
       <div>
         <div class="prose max-w-none">
-          <h3 class="text-2xl font-semibold text-gray-900 mb-4">Instructions</h3>
+          <h2 class="text-2xl font-semibold text-gray-900 mb-4">Instructions</h2>
           <%= recipe.instructions %>
         </div>
       </div>
 
       <div>
-        <h3 class="text-2xl font-semibold text-gray-900 mb-4">Ingredients</h3>
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Ingredients</h2>
         <ul class="space-y-2">
           <% if recipe.ingredients.present? && recipe.ingredients.any? %>
             <% recipe.ingredients.each do |ingredient| %>
-              <li class="flex items-center text-gray-600 text-base bg-gray-50 rounded-lg p-3">
+              <li class="flex items-center text-gray-700 text-base bg-gray-50 rounded-lg p-3">
                 <span class="w-24 font-medium text-sm"><%= ingredient["quantity"] %> <%= ingredient["unit"] %></span>
                 <span class="text-sm font-medium"><%= ingredient["name"] %></span>
               </li>
@@ -64,38 +63,38 @@
     </div>
 
     <div>
-      <h3 class="text-2xl font-semibold text-gray-900 mb-6">Nutrition Facts</h3>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-6">Nutrition Facts</h2>
+      <div class="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-4">
         <div class="bg-gray-50 rounded-lg p-4">
-          <span class="block text-gray-500 text-base">Calories</span>
+          <span class="block text-gray-600 text-base">Calories</span>
           <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["calories"].to_s.gsub(/\s*(kcal|cal)?\s*$/i, '') %> kcal</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
-          <span class="block text-gray-500 text-base">Protein</span>
+          <span class="block text-gray-600 text-base">Protein</span>
           <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["protein"].to_s.gsub(/\s*g?\s*$/i, '') %>g</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
-          <span class="block text-gray-500 text-base">Fat</span>
+          <span class="block text-gray-600 text-base">Fat</span>
           <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["fat"].to_s.gsub(/\s*g?\s*$/i, '') %>g</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
-          <span class="block text-gray-500 text-base">Carbs</span>
+          <span class="block text-gray-600 text-base">Carbs</span>
           <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["carbs"].to_s.gsub(/\s*g?\s*$/i, '') %>g</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
-          <span class="block text-gray-500 text-base">Fiber</span>
+          <span class="block text-gray-600 text-base">Fiber</span>
           <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["fibre"].to_s.gsub(/\s*g?\s*$/i, '') %>g</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
-          <span class="block text-gray-500 text-base">Sugar</span>
+          <span class="block text-gray-600 text-base">Sugar</span>
           <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["sugar"].to_s.gsub(/\s*g?\s*$/i, '') %>g</span>
         </div>
         <div class="bg-gray-50 rounded-lg p-4">
-          <span class="block text-gray-500 text-base">Sodium</span>
+          <span class="block text-gray-600 text-base">Sodium</span>
           <span class="font-medium text-gray-900 text-xl"><%= recipe.nutrition["sodium"].to_s.gsub(/\s*mg?\s*$/i, '') %>mg</span>
         </div>
       </div>
     </div>
   </div>
-</div>
+</article>
 <% end %>
