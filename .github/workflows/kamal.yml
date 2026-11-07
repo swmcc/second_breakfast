@@ -44,7 +44,7 @@ on:
 jobs:
   kamal:
     name: ${{ inputs.action }} to ${{ inputs.destination }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     # The GitHub Environment is what gates production: configure required
     # reviewers on it in Settings -> Environments (see docs/deployment.md).
